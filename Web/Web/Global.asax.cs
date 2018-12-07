@@ -13,6 +13,8 @@ namespace Web
     {
         protected void Application_Start()
         {
+            //测试提交
+            int a = 3 + 5;
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
