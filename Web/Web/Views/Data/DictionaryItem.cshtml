@@ -1,0 +1,61 @@
+﻿@model List<Maticsoft.Model.BaseData>
+
+@{
+    Layout = null;
+}
+
+<table class="table table-hover table-striped selfTable">
+    <thead>
+        <tr>
+            <th>
+                <input class="js_selectAll" type="checkbox" id="js_selectAll" />
+            </th>
+            <th class="center">编号</th>
+            <th>字典表名称</th>
+            <th class="center">主键ID</th>
+            <th class="center">字段值</th>
+            <th class="center">显示顺序</th>
+            <th class="center">状态</th>
+            <th class="center">管理操作</th>
+        </tr>
+    </thead>
+    <tbody id="pagecontent">
+        @foreach (var d in Model)
+        {
+            string ActiveName = "不可用";
+            string classname = "text-danger";
+            if (d.IsActive == 1)
+            {
+                ActiveName = "可用";
+                classname = "text-navy";
+            }
+            <tr class="gradeX">
+                <th>
+                    <input class="js_selectAll" type="checkbox" value="@(d.ID)" name="userSelector" />
+                </th>
+                <td class="center">@d.ID</td>
+                <td>@d.TableName</td>
+                <td class="center">@d.KeyID</td>
+                <td>@d.Name</td>
+                <td class="center">@d.Display</td>
+                <td class="center @classname">@ActiveName</td>
+                <td class="center">
+                    <a class="reset" data-id="edit" name="@d.ID" onclick="edit(this);">编辑</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="row">
+    <div class="col-md-12">
+        <ul id="pagination" class="pagination  pull-right" data-pagecount="@(ViewData["pagecount"])" data-currentpage="@(ViewData["currentpage"])" data-url="/Data/DictionaryItem"></ul>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+$(function () {
+    LoadPagination();
+});
+</script>

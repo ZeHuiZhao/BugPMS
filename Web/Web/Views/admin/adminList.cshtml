@@ -1,0 +1,153 @@
+﻿@using DBUtility;
+@model List<Maticsoft.Model.UserInfo>
+@{
+    ConfigurationHelper config = new ConfigurationHelper();
+    Maticsoft.BLL.Common BCommon = new Maticsoft.BLL.Common();
+    string WebUrlPath = config.getConfigName("WebUrl");
+    Layout = null;
+}
+
+<table class="table table-hover table-striped  selfTable">
+    <thead>
+        <tr>
+            <th>
+                <input class="js_selectAll" type="checkbox" />
+            </th>
+            <th>编号</th>
+            <th>用户名</th>
+            <th>真实姓名</th>
+            <th>角色</th>
+            <th>用户来源</th>
+            <th>状态</th>
+            <th>管 理 操 作</th>
+        </tr>
+    </thead>
+    <tbody id="pagecontent">
+        @if (ViewData["userinfoList"] != null)
+        {
+            foreach (Maticsoft.Model.UserInfo d in Model)
+            {
+                string status = "";
+                status = d.status == 1 ? "<span class='yes'>已审核</span>" : "<span class='no'>禁用</span>";
+                <tr class="gradeX">
+                    <th>
+                        <input class="js_selectAll" type="checkbox" value="@(d.ID)" />
+                    </th>
+                    <td>@d.ID</td>
+                    <td>
+                        <a class="reset" id="user" onclick="ModalUrl('/admin/addadmin/@d.ID')" name="@d.UserName">@d.UserName</a>
+                    </td>                    
+                    <td>@d.TrueName</td>
+                    <td>@BCommon.GetRoleNameByRoleID(d.RoleID.ToString())</td>
+                    <td>@d.UserFrom</td>
+                    <td>@Html.Raw(status)</td>
+                    <td class="center">
+                        <a name="@d.ID" onclick="edit(this);">编辑</a>
+                        |<a class="reset" data-id="examine" name="@d.ID">审核</a>
+                        |<a class="reset" data-id="ResetPassword" name="@d.ID">重置密码(123456)</a>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+<div class="row">
+    <div class="col-md-12">
+        <ul id="pagination" class="pagination  pull-right" data-pagecount="@(ViewData["pagecount"])" data-currentpage="@(ViewData["currentpage"])"
+            data-url="/admin/adminList"></ul>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        var myDate = new Date();
+        var strnum = myDate.getTime().toString();
+
+        //重置密码
+        $(".reset").click(function () {
+            var i = $(this).attr("name");//获取当前这条数据的ID值
+            var id = $(this).attr("data-id");//examine表示审核，ResetPassword重置密码
+            if (id == "ResetPassword")//设置密码，重置为123456
+            {
+                $.ajax({
+                    url: '@WebUrlPath/Json/ResertUserInfoPassword/' + i,
+                    cache: false,
+                    error: function () {
+                        toastr.error("网络繁忙请稍后再试");
+                    },
+                    success: function (data) {
+                        if (data.Result == "success") {
+                            toastr.success(data.Message);
+                            loadPage();
+                        }
+                        else {
+                            toastr.error(data.Message);
+                        }
+                    }
+                });
+            }
+
+            if (id == "examine")//审核用户
+            {
+                $.ajax({
+                    url: '@WebUrlPath/Json/ResertUserInfostatus/' + i,
+                    cache: false,
+                    error: function () {
+                        toastr.error("网络繁忙请稍后再试");
+                    },
+                    success: function (data) {
+                        if (data.Result == "success") {
+                            toastr.success(data.Message);
+                            loadPage();
+                        }
+                        else {
+                            toastr.error(data.Message);
+                        }
+                    }
+                });
+            }
+        });
+        //表单验证
+        $("#addAdminForm").validate({
+            rules: {
+                ausername: {
+                    required: true,
+                    rangelength: [6, 20]
+                },
+                atruename: "required",
+                apassword: {
+                    required: true,
+                    rangelength: [6, 20]
+                },
+                confirm_password: {
+                    required: true,
+                    rangelength: [6, 20],
+                    equalTo: "#apassword"
+                },
+            },
+            messages: {
+                ausername: {
+                    required: "请输入用户名",
+                    rangelength: "用户名长度6-20字符"
+                },
+                atruename: "请输入姓名",
+                apassword: {
+                    required: "请输入密码",
+                    rangelength: "密码长度6-20字符"
+                },
+                confirm_password: {
+                    required: "请输入确认密码",
+                    rangelength: "密码长度6-20字符",
+                    equalTo: "两次输入不一致"
+                },
+            }
+        });
+
+
+    });
+</script>
+<script type="text/javascript">
+$(function () {
+    LoadPagination();
+});
+</script>

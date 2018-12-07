@@ -1,0 +1,60 @@
+﻿@model List<Maticsoft.Model.Privilege>
+@{
+    Layout = null;
+}
+
+<table class="table table-hover table-striped  selfTable">
+    <thead>
+        <tr>
+            <th>
+                <input class="js_selectAll" type="checkbox" id="js_selectAll"/>
+            </th>
+            <th>编号</th>
+            <th>菜单名称</th>
+            <th>父级菜单</th>
+            <th>排序</th>         
+            <th>链接地址</th>
+            <th>样式</th>
+            <th>状态</th>
+            <th>管 理 操 作</th>
+        </tr>
+    </thead>
+    <tbody id="pagecontent">
+        @if (ViewData["userinfoList"] != null)
+        {
+            foreach (Maticsoft.Model.Privilege d in Model)
+            {
+
+                string status = "";
+                status = d.Enable == 1 ? "<span class='yes'>已审核</span>" : "<span class='no'>禁用</span>";
+                <tr class="gradeX">
+                    <th>
+                        <input class="js_selectAll" type="checkbox" value="@(d.ID)" name="userSelector"/>
+                    </th>
+                    <td>@d.ID</td>                     
+                    <td>@d.Name</td>    
+                    <td>无</td>
+                    <td>@d.DisplayOrder</td>      
+                    <td>@d.Href</td> 
+                    <td>@d.CssStyle</td>      
+                    <td>@Html.Raw(status)</td>              
+                    <td class="center">
+                        <a name="@d.ID" onclick="edit(this);">编辑</a>
+                        |<a class="reset" data-id="examine" name="@d.ID">审核</a>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+<div class="row">
+    <div class="col-md-12">
+        <ul id="pagination" class="pagination  pull-right" data-pagecount="@(ViewData["pagecount"])" data-currentpage="@(ViewData["currentpage"])"
+            data-url="/Privilege/FirstPrivilegeList"></ul>
+    </div>
+</div>
+<script type="text/javascript">
+$(function () {
+    LoadPagination();
+});
+</script>

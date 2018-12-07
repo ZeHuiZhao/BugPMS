@@ -1,0 +1,197 @@
+﻿@using DBUtility;
+@{
+    Layout = null;
+    ViewBag.Title = "反馈中心_中力顾问";
+    ConfigurationHelper config = new ConfigurationHelper();
+    string WebUrlPath = config.getConfigName("WebUrl");
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="@WebUrlPath/Scripts/css/bootstrap.css" rel="stylesheet" />
+    <link href="@WebUrlPath/Scripts/css/plugins/toastr/toastr.min.css" rel="stylesheet" />
+    <link href="@WebUrlPath/Scripts/font-awesome/css/font-awesome.css" rel="stylesheet" />
+    <link href="@WebUrlPath/Scripts/css/plugins/footable/footable.core.css" rel="stylesheet" />
+    <link href="@WebUrlPath/Scripts/css/animate.css" rel="stylesheet" />
+    <link href="@WebUrlPath/Content/style.css" rel="stylesheet" />
+    <link href="@WebUrlPath/Scripts/css/pagination.css" rel="stylesheet" />
+    <!-- 自定义 -->
+    <link href="@WebUrlPath/Content/WkWrite.css" rel="stylesheet" />
+    
+    <!-- Mainly scripts -->
+    <script src="@WebUrlPath/Scripts/jquery-2.1.1.js"></script>
+    <script src="@WebUrlPath/Scripts/jquery.pagination.js"></script>
+    <script src="@WebUrlPath/Scripts/js/bootstrap.min.js"></script>
+    <script src="@WebUrlPath/Scripts/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="@WebUrlPath/Scripts/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    @RenderSection("headBottom", false)  
+    <link href="@WebUrlPath/Scripts/My97DatePicker/skin/WdatePicker.css" rel="stylesheet" />
+    <script src="@WebUrlPath/Scripts/My97DatePicker/WdatePicker.js"></script>
+   
+</head>
+<body>
+
+
+<div id="wrapper">
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                @Html.Raw(@Html.Action("Menu", "Menu").ToString())
+            </div>
+        </nav>
+        <div id="page-wrapper" class="gray-bg">
+            @RenderBody()
+            <div class="footer">
+                <div>
+                    ©2016-<span id="nowYear"></span> 中力顾问
+                </div>
+            </div>
+        </div>
+        </div>
+
+
+    <!-- Custom and plugin javascript -->
+    <script src="@WebUrlPath/Scripts/js/inspinia.js"></script>
+    <script src="@WebUrlPath/Scripts/plugins/pace/pace.min.js"></script>
+
+    <script src="@WebUrlPath/Scripts/js/plugins/toastr/toastr.min.js"></script>
+    <script src="@WebUrlPath/Scripts/li-active.js"></script>
+    <script src="@WebUrlPath/Scripts/jquery.validate.min.js"></script>
+    <script src="@WebUrlPath/Scripts/template.js"></script>
+    <!-- commonJS -->
+    <script src="@WebUrlPath/Scripts/commonJS/common.js"></script>
+    
+
+    @RenderSection("BodyBottom", false)
+
+    <script type="text/javascript">
+
+        
+        $(function () {
+            toRed("@Session["TrueName"]");
+            function toRed(content) {
+                //var bodyHtml = $("div.mc-content").html();
+                //var x = bodyHtml.replace(new RegExp(content, "gm"), "<span class='label label-info' >" + content + "</span>")
+                //$("div.mc-content").html(x);
+            }
+
+        toastr.options = {
+            closeButton: true,
+            debug: false,
+            progressBar: true,
+            positionClass: "toast-top-right",
+            onclick: null,
+            showDuration: "300",
+            hideDuration: "1000",
+            timeOut: "3000",
+            extendedTimeOut: "1000",
+            showEasing: "swing",
+            hideEasing: "linear",
+            showMethod: "fadeIn",
+            hideMethod: "fadeOut"
+        };
+            //定时器，每隔五分钟执行一次，判断session是否超时
+        setInterval(function () {
+            $.ajax({
+                type: "POST",
+                url: '@WebUrlPath/Json/GetSessionName',
+                success: function (data) {
+                    if (data.Result == "success")//新增成功
+                    {
+                    }
+                    else {
+                        toastr.error("登录超时，现在返回登录页面");
+                        var url = "location.href = '@WebUrlPath/Window/Login';";
+                        window.setTimeout(url, 1000);
+                    }
+                },
+                error: function () {
+                    toastr.error("网络繁忙请稍后再试");
+                }
+            });
+        }, 300000);
+
+        var url = $("#pagination").attr("data-url");
+        $("#submit").click(function () {//筛选
+            $("#Currentpage").val(0);
+            //var data = $("#search").serialize();
+            //console.log(data);
+            $(".mc-content").load("@WebUrlPath" + url, $("#search").serialize(), function (res) {
+                console.log(1);
+                toRed("@Session["TrueName"]");
+            });
+        });
+        var strnum = "zlgw" + new Date().getTime();
+        var pagecount = $("#pagination").attr("data-pagecount");
+        var currentpage = $("#pagination").attr("data-currentpage");
+
+        var pageData = {
+            pageCount:pagecount,
+            currentPage:currentpage - 1,
+            url: "@WebUrlPath" + url
+        }
+        currentPage = currentpage - 1;
+        $(".pagination").pagination(pageData.pageCount, {
+            current_page: pageData.currentPage, //当前显示的是第几页
+            callback: loadContents //翻页回调函数
+        });
+
+
+        });
+        function loadContents(index, jq) {
+            var url = $("#pagination").attr("data-url");
+            var index1 = index + 1;
+            var strnum = "zlgw" + new Date().getTime();
+            url = "@WebUrlPath" + url;
+            $(".mc-content").load(url, "page=" + index1 + "&strmatch=" + strnum + "&" + $("#search").serialize(), function (res) {
+                console.log(2);
+                toRed("@Session["TrueName"]");
+            });
+        }
+        function loadPage() {
+            var url = $("#pagination").attr("data-url");
+            var myDate = new Date();
+            var strnum = myDate.getTime().toString();
+            var currentpage = $("#pagination").attr("data-currentpage");
+            url = "@WebUrlPath" + url;
+            $(".mc-content").load(url, "page=" + currentpage + "&strmatch=" + strnum + "&" + $("#search").serialize(), function (res) {
+                console.log(3);
+                toRed("@Session["TrueName"]");
+            });
+        }
+        function LoadPagination() {
+            var url = $("#pagination").attr("data-url");
+            var myDate = new Date();
+            var strnum = myDate.getTime().toString();
+            var pagecount = $("#pagination").attr("data-pagecount");
+            var currentpage = $("#pagination").attr("data-currentpage");
+
+            var pageData = {
+                pageCount: pagecount,
+                currentPage: currentpage - 1,
+                url: "@WebUrlPath" + url
+            }
+            currentPage = currentpage - 1;
+            $(".pagination").pagination(pageData.pageCount, {
+                current_page: pageData.currentPage, //当前显示的是第几页
+                callback: loadContents //翻页回调函数
+            });
+        }
+    </script>
+    <script type="text/javascript">
+        var adminID = "@(Session["UserInfoID"])";
+        if (adminID == "0") {
+            toastr.error("登录超时,请稍后重新登录！");
+            setTimeout("Href()", 500);
+        }
+    </script>
+
+</body>
+</html>
+
+        
+      

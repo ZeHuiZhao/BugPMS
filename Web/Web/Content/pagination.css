@@ -1,0 +1,30 @@
+﻿
+
+
+/*page*/
+.pagination{ overflow: hidden;text-align: center;padding-right: 10px;font-size: 14px;margin-top: 20px;font-weight: 700;}
+/*.pagination .prev{ padding-left: 18px; }*/
+.pagination a{display: inline-block;width: 27px;height: 27px;vertical-align: middle;color:#a4a9ae;line-height: 27px; background:#dcdddd; text-align:center; color:#3e3a39; font-size:12px; margin:0 4px;}
+.pagination a:hover{text-decoration: none;}
+.pagination span{display: inline-block;width: 27px;height: 27px;vertical-align: middle;line-height: 27px; margin:0 4px;}
+.pagination .current{color: #ffffff; background:#08ac70; }
+.pagination .prev,.pagination .next{display:inline-block; margin:0 4px; width: 27px;height: 27px;background: url(patterns/icon2.png?version=20150508) no-repeat;vertical-align: middle;overflow: hidden;color:#fff; text-indent:-9999em;}
+.pagination .prev{background-position: 0 -87px;}
+.pagination .next{background-position: 0 -116px;}
+.pagination .current.prev{width: 27px;height: 27px; margin:0 4px;}
+.pagination .current.next{width: 27px;height: 27px; margin:0 4px;}
+
+.pagination .prev:hover,.pagination .next:hover{ }
+
+
+
+.pagination .current.prev:hover,.pagination .current.next:hover{}
+
+.pagination .prev:before, .pagination .next:before{ }
+.pagination .prev:hover, .pagination .next:hover{}
+/* 
+.pagination .prev:before{background-position: -57px -270px;}
+.pagination .next:before{background-position: -159px -213px;position: absolute;right: -10px;top: 2px;}
+.pagination .current.prev:before{background-position: -141px -195px;position: absolute;left: -10px;top: 3px;}
+.pagination .current.next:before{background-position: -159px -195px;position: absolute;right: -10px;top:2px;} */
+

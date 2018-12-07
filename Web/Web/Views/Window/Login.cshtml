@@ -1,0 +1,62 @@
+﻿@using DBUtility;
+@{
+    Layout = null;
+    ViewBag.Title = "用户 | 登录";
+    ConfigurationHelper config = new ConfigurationHelper();
+    string WebUrlPath = config.getConfigName("WebUrl");
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> 用户 | 登录</title>
+    <link href="@WebUrlPath/Content/bootstrap.css" rel="stylesheet" />
+    <link href="@WebUrlPath/Content/font-awesome.css" rel="stylesheet" />
+    <link href="@WebUrlPath/Content/animate.css" rel="stylesheet" />
+    <link href="@WebUrlPath/Content/style.css" rel="stylesheet" />
+    <link href="@WebUrlPath/Content/WkWrite.css" rel="stylesheet" />
+</head>
+
+<body class="gray-bg" onkeyup="keyLogin()">
+    <div class="middle-box text-center loginscreen animated fadeInDown">
+        <div>
+            <div class="m-t-xl m-b-md">
+                <h5 class="logo-name">Server</h5>
+            </div>
+            <h3>反馈中心</h3>
+            <form class="m-t" role="form" method="post">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="用户名" required="" name="username" >
+
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" placeholder="密码" required="" name="password" >
+                </div>
+                <button type="submit" class="btn btn-primary block full-width m-b addLogin" id="Login">登 录</button>
+                <p class="text-muted text-center"><small>技术支持:中力顾问</small></p>
+            </form>
+            <p class="m-t"> <small></small> </p>
+        </div>
+    </div>
+    <script src="@WebUrlPath/Scripts/jquery-2.1.1.js"></script>
+    <script src="@WebUrlPath/Scripts/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        function keyLogin() {
+            if (event.keyCode == 13) {   //回车键的键值为13
+                document.getElementById("Login").click();  //调用登录按钮的登录事件
+            }
+        }
+        var flag="@ViewData["flag"]";
+        if (flag == "3") {
+            alert('用户名或密码错误！');
+        }
+        else if (flag == "3") {
+            alert('请求超时，请重试！');
+        }
+    </script> 
+</body>
+
+</html>
+
+

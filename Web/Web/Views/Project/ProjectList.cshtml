@@ -1,0 +1,276 @@
+﻿@using DBUtility;
+@{
+    ConfigurationHelper config = new ConfigurationHelper();
+    string WebUrlPath = config.getConfigName("WebUrl");
+    Layout = WebUrlPath + "/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ">项目 | 列表";
+
+}
+
+
+<div class="row border-bottom">
+    <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <div class="navbar-header">
+            <a class="navbar-minimalize minimalize-styl-2 btn btn-primary addbtn-primary" href="#">
+                <i class="fa fa-bars"> </i>
+            </a>
+        </div>
+        <div class="add_button">
+        </div>
+    </nav>
+</div>
+@*<div class="row wrapper border-bottom white-bg p-m">
+    <form class="form-horizontal" id="search">
+        <div class="form-group">
+            <div class="col-sm-12 row">
+                    <div class="col-md-2 m-t-sm">
+                        <input type="text" class="form-control" placeholder="项目名称" name="ProjectName" />
+                    </div>
+                    <div class="col-md-1 m-t-sm">
+                        <input type="button" value="筛   选" id="submit" class="btn btn-primary" />
+                    </div>
+            </div>
+        </div>
+    </form>
+</div>*@
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>进行中的项目 | 列表</h5>
+                </div>
+                <div class="mc-content ibox-content">
+                    @Html.Action("ProjectItem", "Project",
+                           new RouteValueDictionary(){
+                            {"ProjectTypeID", "2"}
+                           })
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal inmodal" id="Modal" tabindex="-3" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content animated fadeInDown">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body position_r clearfix">
+                <select class="form-control" name="ProjectStatus" ></select>
+                <textarea class="form-control CheckNote m-t h-100" placeholder="审核意见" ></textarea>
+            </div>
+            <div class="modal-footer">
+                <button data-dismiss="modal" class="btn btn-white" type="button" id="cancel">取消</button>
+                <input type="button" id="btnProjectListModal" value="确认" class="btn btn-primary" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section BodyBottom{
+
+<script type="text/javascript">
+    $(function () {
+        var Modal = $("#Modal");//模态框
+        var ModalTitle = $("#Modal .modal-title");
+    //项目类型
+    @*$.ajax({
+        type: "POST",
+        url: "@WebUrlPath/Json/getBaseData",
+        data: { TableName: 'ProjectType' },
+        success: function (result) {
+            var pHtml = "<option value=''>项目类型</option>";
+            var data = JSON.parse(result);
+            for (var i = 0; i < data.length; i++) {
+                pHtml += "<option value='" + data[i].KeyID + "'>" + data[i].Name + "</option>"
+            }
+            $("#ProjectTypeID").html(pHtml);
+        },
+        error: function b(ms) {
+            alert("请求失败，请按F5刷新！");
+            return;
+        }
+    });*@
+    //项目状态
+    @*$.ajax({
+        type: "POST",
+        url: "@WebUrlPath/Json/getBaseData",
+        data: { TableName: 'ProjectStatus' },
+        success: function (result) {
+            var pHtml = "<option value=''>项目状态</option>";
+            var data = JSON.parse(result);
+            for (var i = 0; i < data.length; i++) {
+                pHtml += "<option value='" + data[i].KeyID + "' class='" + data[i].ClassName + "'>" + data[i].Name + "</option>"
+            }
+            $("#ProjectStatusID").html(pHtml);
+        },
+        error: function b(ms) {
+            alert("请求失败，请按F5刷新！");
+            return;
+        }
+    });*@
+
+   //项目审核状态
+    @*$.ajax({
+        type: "POST",
+        url: "@WebUrlPath/Json/getBaseData",
+        data: { TableName: 'ProjectCheckStatus' },
+        success: function (result) {
+            var pHtml = "<option value=''>审核状态</option>";
+            var data = JSON.parse(result);
+            for (var i = 0; i < data.length; i++) {
+                pHtml += "<option value='" + data[i].KeyID + "' class='" + data[i].ClassName + "'>" + data[i].Name + "</option>"
+            }
+            $("#ProjectCheckStatusID").html(pHtml);
+        },
+        error: function b(ms) {
+            alert("请求失败，请按F5刷新！");
+            return;
+        }
+    });*@
+
+        $("div.mc-content").on('click', 'td .operate', function () {
+            
+            var operate = $(this).attr("data-operate");
+            var datawhere = $(this).attr("data-where");
+            var flag = "";
+            if (typeof (datawhere) != "undefined" && datawhere != "") {
+                flag = "?flag=" + datawhere;
+            }
+            var id = $(this).parent().parent().attr("data-id");
+            if (operate == "editProject") {
+                location.href = "@WebUrlPath/Project/ProjectAdd/" + id;
+            }
+            else if (operate == "scanPlan") {
+                location.href = "@WebUrlPath/Project/ProjectPlan/" + id + flag;
+            }
+            else if (operate == "editprogress") {
+                location.href = "@WebUrlPath/Project/ProjectPlanDone/" + id + flag;
+            }
+            else if (operate == "scanGantt") {
+                window.open("@WebUrlPath/Project/ProjectGantt/" + id );
+            }
+            else if (operate == "ProjectDel") {
+                var msg = "删除后不可恢复，确定删除？";
+                var confir = confirm(msg);
+                if (confir) {
+                    $.ajax({
+                        type: "POST",
+                        url: "@WebUrlPath/Json/ProjectDel",
+                        data: { ProjectID: id },
+                        success: function (data) {
+                            if (data.Result == "success") {
+                                toastr.success(data.Message);
+                                var url = "window.location.reload();";
+                                window.setTimeout(url, 1000);
+                            }
+                            else {
+                                toastr.error(data.Message);
+                            }
+                        },
+                        error: function b(ms) {
+                            alert("请求失败，请按F5刷新！");
+                            return;
+                        }
+                    });
+                }
+            }
+            else if (operate == "updateStatus") {
+                ModalTitle.html("更新项目状态");
+                Modal.attr("data-operate", "updateStatus");
+                Modal.attr("data-id", id);
+                var select = Modal.find("div.modal-body select");
+                var html = $("#ProjectStatusID").html();
+                select.html(html);
+                Modal.find("div.modal-body textarea.CheckNote").hide();
+                Modal.modal("show");
+            }
+            else if (operate == "updateCheckStatus") {
+                ModalTitle.html("审核项目");
+                Modal.attr("data-operate", "updateCheckStatus");
+                Modal.attr("data-id", id);
+                var select = Modal.find("div.modal-body select");
+                var html = $("#ProjectCheckStatusID").html();
+                select.html(html);
+                select.find("option").each(function() {
+                    if (!($(this).val() == "3" || $(this).val() == "4" || $(this).val() == "")) {
+                        $(this).remove();
+                    }
+                });
+                Modal.find("div.modal-body textarea.checknote").show();
+                Modal.modal("show");
+            }
+        });
+        $("#btnProjectListModal").click(function () {
+            var operate = Modal.attr("data-operate");
+            if (operate == "updateStatus") {
+                var ProjectID = Modal.attr("data-id");
+                var select = Modal.find("div.modal-body select");
+                var val = select.val();
+                if (val != "") {
+                    $.ajax({
+                        type: "POST",
+                        url: "@WebUrlPath/Json/updateProjectStatus",
+                        data: { ProjectID: ProjectID, StatusID: val },
+                        success: function (data) {
+                            if (data.Result == "success") {
+                                toastr.success(data.Message);
+                                Modal.modal("hide");
+                                var url = "window.location.reload();";
+                                window.setTimeout(url, 1000);
+                            }
+                            else {
+                                toastr.error(data.Message);
+                            }
+                        },
+                        error: function b(ms) {
+                            alert("请求失败，请按F5刷新！");
+                            return;
+                        }
+                    });
+                }
+                else {
+                    toastr.error("请选择对应状态后提交！");
+                }
+            }
+            else if (operate == "updateCheckStatus") {
+                var ProjectID = Modal.attr("data-id");
+                var select = Modal.find("div.modal-body select");
+                var val = select.val();
+                var text = Modal.find("div.modal-body textarea.CheckNote").val();
+                if (val != "") {
+                    $.ajax({
+                        type: "POST",
+                        url: "@WebUrlPath/Json/updateProjectCheckStatus",
+                        data: { ProjectID: ProjectID, CheckStatusID: val, CheckNote:text },
+                        success: function (data) {
+                            if (data.Result == "success") {
+                                toastr.success(data.Message);
+                                Modal.modal("hide");
+                                var url = "window.location.reload();";
+                                window.setTimeout(url, 1000);
+                            }
+                            else {
+                                toastr.error(data.Message);
+                            }
+                        },
+                        error: function b(ms) {
+                            alert("请求失败，请按F5刷新！");
+                            return;
+                        }
+                    });
+                }
+                else {
+                    toastr.error("请选择对应状态后提交！");
+                }
+            }
+        });
+});
+</script>
+}

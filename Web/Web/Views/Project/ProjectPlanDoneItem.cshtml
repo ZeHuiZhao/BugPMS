@@ -1,0 +1,132 @@
+﻿@using DBUtility;
+@model List<Maticsoft.Model.ProjectTask>
+@{
+    Layout = null;
+    Maticsoft.BLL.BaseData BBaseData = new Maticsoft.BLL.BaseData();
+    Maticsoft.BLL.Common BCommon = new Maticsoft.BLL.Common();
+    ConfigurationHelper config = new ConfigurationHelper();
+    string WebUrlPath = config.getConfigName("WebUrl");
+    string operate = "";
+    if (ViewData["operate"] != null)
+    {
+        operate = ViewData["operate"].ToString();
+    }
+}
+
+<table class="table table-hover table-striped selfTable" id="tablePlan">
+    <thead>
+        <tr>
+            <th class="center" style="width:90px">操作</th>            
+            <th class="center" style="width:40px">编号</th>
+            <th class="center" style="width:90px">提交人</th>
+            <th>需求/bug描述</th>
+            <th>目标/期望</th>
+            <th class="center" style="width:94px">期望完成时间</th>
+            <th class="center" style="width:90px;">计划起止</th>
+            <th class="center" style="width:90px">任务接收人</th>
+            <th class="center" style="width:69px">任务状态</th>
+            <th class="center" style="width:90px;">实际起止</th>
+            <th>完成情况</th>
+            <th>备注</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @{
+
+            #region
+            List<Maticsoft.Model.ProjectTask> MProjectTaskList= Model;
+            int num = 0;
+            #endregion
+            var ProjectTaskCount = MProjectTaskList.Count();
+            if (ProjectTaskCount > 0)
+            {
+                Maticsoft.BLL.Project BProject = new Maticsoft.BLL.Project();
+                Maticsoft.Model.Project MProject =BProject.GetModel((int)(MProjectTaskList[0].ProjectID));
+                for (int i = 0; i < MProjectTaskList.Count(); i++)
+                {
+                    #region
+                    var taskitem = MProjectTaskList[i];
+                    num++;
+                    string RealStartTime = "", RealEndTime = "";
+                    if (taskitem.RealStartTime != null)
+                    {
+                        RealStartTime = Convert.ToDateTime(taskitem.RealStartTime).ToString("yyyy-MM-dd");
+                    }
+                    if (taskitem.RealEndTime != null)
+                    {
+                        RealEndTime = Convert.ToDateTime(taskitem.RealEndTime).ToString("yyyy-MM-dd");
+                    }
+                    string status = "", classname = "";
+                    var MBaseDataList = BBaseData.GetModelList(" TableName='DealStatus' AND KeyID='" + taskitem.DealStatusID + "'");
+                    if (MBaseDataList != null && MBaseDataList.Count > 0)
+                    {
+
+                        status = MBaseDataList[0].Name;
+                        classname = MBaseDataList[0].ClassName;
+                    }
+                    if (taskitem.DealUserID == null)
+                    {
+                        taskitem.DealUserID = 0;
+                    }
+                    string fileAddress = "";
+                    if (!string.IsNullOrEmpty(taskitem.FileAddress))
+                    {
+                        string Url = WebUrlPath+ taskitem.FileAddress;
+                        string FileName = taskitem.FileAddress.Remove(0, taskitem.FileAddress.LastIndexOf("/") + 1);
+                        fileAddress = "附件：<a target='_blank' href='" + Url + "'>" + FileName + "</a>";
+                    }
+                    #endregion
+                    <tr data-Planid="@taskitem.ID">
+                        <td>
+                      @if (Session["UserInfoID"] != null
+                          && ((MProject.LeaderID.ToString() == Session["UserInfoID"].ToString() && taskitem.DealStatusID == 1)
+                            || Session["RoleID"].ToString() == "1"))
+                                {
+                                    <a href="#" data-Planid="@taskitem.ID" class="GivePlan">分配　</a>
+                                }
+                    @if (Session["UserInfoID"] != null
+                          && ((taskitem.DealUserID.ToString() == Session["UserInfoID"].ToString() && taskitem.DealStatusID < 3)
+                          || Session["RoleID"].ToString() == "1"))
+                    {
+                                    <a href="#" data-Planid="@taskitem.ID" class="DonePlan">完成</a>
+                    }
+
+                            </td>                        
+                        <td class="center">@num</td>
+                        <td class="center">@BCommon.GetNameByUserInfoID((int)taskitem.CreateUserID)<br />
+                        @Convert.ToDateTime(taskitem.CreateDate).ToString("MM-dd HH:mm")</td>
+                        <td><span class="trContents">@taskitem.Contents</span> <br />@Html.Raw(fileAddress)</td>
+                        <td class="trTarget">@taskitem.Target</td>
+                        <td class="center trExpectedDate">@Convert.ToDateTime(taskitem.ExpectedDate).ToString("yyyy-MM-dd").Replace("0001-01-01", "")</td>
+                        <td class="center" style="line-height:25px;">
+                        @Html.Raw("<span class='label label-info m-xxs' title='计划开始日期'>"
+                         + Convert.ToDateTime(taskitem.PlanStartTime).ToString("yyyy-MM-dd").Replace("0001-01-01", "")
+                         + "</span><br/><span class='label label-success' title='计划结束日期'>"
+                         + Convert.ToDateTime(taskitem.PlanEndTime).ToString("yyyy-MM-dd").Replace("0001-01-01", "")+"</span>")</td>
+                        <td class="center trDealUserID">@BCommon.GetNameByUserInfoID((int)taskitem.DealUserID)</td>
+                        <td class="center trDealStatusID @classname">@status</td>
+                        <td class="center" style="line-height:25px;">
+                            @Html.Raw("<span class='label label-info m-xxs trRealStartTime' title='实际开始日期'>"
+                         + Convert.ToDateTime(taskitem.RealStartTime).ToString("yyyy-MM-dd").Replace("0001-01-01", "")
+                         + "</span><br/><span class='label label-success trRealEndTime' title='实际结束日期'>"
+                         + Convert.ToDateTime(taskitem.RealEndTime).ToString("yyyy-MM-dd").Replace("0001-01-01", "") + "</span>")
+                        </td>
+
+                        <td class="trResult">@taskitem.Result</td>
+                        <td class="trNote">@taskitem.Note</td>
+
+                    </tr>
+                }
+            }
+
+        }
+    </tbody>
+</table>
+
+<div class="row">
+    <div class="col-md-12">
+        <ul id="pagination" class="pagination  pull-right" data-pagecount="@(ViewData["pagecount"])" data-currentpage="@(ViewData["currentpage"])"
+            data-url="/Project/ProjectPlanDoneItem"></ul>
+    </div>
+</div>

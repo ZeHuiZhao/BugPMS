@@ -1,0 +1,145 @@
+﻿@using DBUtility;
+@model List<Maticsoft.Model.ProjectTask>
+@{
+    Layout = null;
+    Maticsoft.BLL.Common common = new Maticsoft.BLL.Common();
+    Maticsoft.BLL.BaseData BBaseData = new Maticsoft.BLL.BaseData();
+    Maticsoft.BLL.Project BProject = new Maticsoft.BLL.Project();
+    Maticsoft.Model.Project MProject = new Maticsoft.Model.Project();
+    ConfigurationHelper config = new ConfigurationHelper();
+    string WebUrlPath = config.getConfigName("WebUrl");
+    bool Submitflag = false;
+    int UserInfoID = 0, RoleID = 0;
+    if (Session["UserInfoID"] != null)
+    {
+        UserInfoID = int.Parse(Session["UserInfoID"].ToString());
+    }
+    if (Session["RoleID"] != null)
+    {
+        RoleID = int.Parse(Session["RoleID"].ToString());
+    }
+    if (RoleID == 1 )
+    {
+        Submitflag = true;
+    }
+}
+
+@if (Model != null)
+{
+    List<Maticsoft.Model.ProjectTask> MProjectTaskList = Model;
+    int num = 0;
+    if (MProjectTaskList != null && MProjectTaskList.Count() > 0)
+    {
+        MProject = BProject.GetModel((int)MProjectTaskList[0].ProjectID);
+    <table class="table table-hover table-striped selfTable" id="tablePlan">
+    <thead>
+        <tr>
+            @if (MProject != null && (UserInfoID == (int)MProject.CheckUserID|| RoleID == 1))
+            {
+                <th><input type="checkbox" id="selectAll">
+<label for="selectAll">全选</label></th>
+            }
+            <th class="center">编号</th>
+            <th>需求/bug描述</th>
+            <th>目标/期望</th>
+            <th class="center">期望完成时间</th>
+            <th class="center">提交人</th>
+            <th class="center">提交时间</th>
+            <th>审核状态</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+       
+            @for (int i = 0; i < MProjectTaskList.Count(); i++)
+            {
+                #region
+                var taskitem = MProjectTaskList[i];
+                num++;
+                #endregion
+                var MProjectTaskCheckStatuslist = BBaseData.GetModelList(" TableName='ProjectTaskCheckStatus' AND KeyID='" + taskitem.ProjectTaskCheckStatusID + "'");
+
+                string status = "", classname = "";
+                if (MProjectTaskCheckStatuslist != null && MProjectTaskCheckStatuslist.Count > 0)
+                {
+                    status = MProjectTaskCheckStatuslist[0].Name;
+                    classname = MProjectTaskCheckStatuslist[0].ClassName;
+                }
+                string fileAddress = "";
+                if (!string.IsNullOrEmpty(taskitem.FileAddress))
+                {
+                    string Url = WebUrlPath+ taskitem.FileAddress;
+                    string FileName = taskitem.FileAddress.Remove(0, taskitem.FileAddress.LastIndexOf("/")+1);
+                    fileAddress = "附件：<a target='_blank' href='"+ Url + "'>"+ FileName + "</a>";
+                }
+                <tr>
+                    @if (MProject != null && (UserInfoID == (int)MProject.CheckUserID || RoleID == 1))
+                    {
+                        <td>
+                            @if (taskitem.ProjectTaskCheckStatusID == 1)
+                            {
+                            <input type="checkbox" class="CBPlan" data-id="@taskitem.ID">
+                            }
+                        </td>
+                    }
+                    <td class="center">@num</td>
+                    <td class="col-lg-4"><span class="trContents">@taskitem.Contents</span> <br />@Html.Raw(fileAddress)</td>
+                    <td class="trTarget col-lg-3">@taskitem.Target</td>
+                    <td class="center ExpectedDate">@Convert.ToDateTime(taskitem.ExpectedDate).ToString("yyyy-MM-dd").Replace("0000-01-01", "")</td>
+                    <td class="center">@common.GetNameByUserInfoID((int)taskitem.CreateUserID)</td>
+                    <td class="center">@(((DateTime)taskitem.CreateDate).ToString("MM-dd HH:mm"))</td>
+                    <td title="@("审核时间："+taskitem.CheckDate+"，审核意见："+taskitem.CheckNote)" class="@classname" >@status</td>
+                    <td>
+                        @if ((UserInfoID == taskitem.CreateUserID && status != "已通过")|| Submitflag)
+                        {
+                            <a href="#" data-Planid="@taskitem.ID" class="ChangePlan">修改</a>
+                            <a href="#" class="delPlan" data-Planid="@taskitem.ID">删除</a>
+                        }
+                    </td>
+                </tr>
+            }
+              
+    </tbody>
+<tfoot>
+    @if (MProject != null && (UserInfoID == (int)MProject.CheckUserID || RoleID == 1))
+    {
+        <tr>
+            <td colspan="9">
+                <textarea class="h-100 col-md-12" placeholder="审核意见" id="CheckNote"></textarea>
+            </td>
+    </tr>
+    <tr>
+        <td colspan="9">
+            <button class="btn btn-primary PlanCheck m-r-md m-t-xs" type="button" data-operate="checkyes">
+                <i class="fa fa-check-square"></i>
+                审核通过
+            </button>
+            <button class="btn btn-danger PlanCheck m-t-xs" type="button" data-operate="checkno">
+                <i class="fa fa-exclamation-circle"></i>
+                审核不通过
+            </button>
+        </td>
+    </tr>
+    }
+</tfoot>
+</table>
+    }
+}
+
+
+
+
+<div class="row">
+    <div class="col-md-12">
+        <ul id="pagination" class="pagination  pull-right" data-pagecount="@(ViewData["pagecount"])" data-currentpage="@(ViewData["currentpage"])"
+            data-url="/Project/ProjectPlanItem"></ul>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+$(function () {
+    LoadPagination();
+});
+</script>
+

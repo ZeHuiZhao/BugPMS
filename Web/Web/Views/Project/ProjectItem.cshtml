@@ -1,0 +1,84 @@
+﻿@model List<Maticsoft.Model.Project>
+@{
+    Layout = null;
+    Maticsoft.BLL.Common BCommon = new Maticsoft.BLL.Common();
+    Maticsoft.BLL.UserInfo BUserInfo = new Maticsoft.BLL.UserInfo();
+    bool flag = false;
+    if (Session["UserInfoID"] != null &&(Session["RoleID"].ToString() == "1" || Session["RoleID"].ToString() == "2"))
+    {
+        flag = true;
+    }
+
+}
+
+
+<table class="table table-hover table-striped selfTable">
+    <thead>
+        <tr>
+            <th>项目名称</th>
+            <th class="center col-md-1">负责人</th>
+            <th class="center col-md-1">审批人</th>
+            <th class="center">待审批</th>
+            <th class="center">已审批</th>
+            <th class="center">未开始</th>
+            <th class="center">进行中</th>            
+            <th class="center">已完成</th>
+            <th class="center">已取消</th>
+            <th>管理操作</th>
+        </tr>
+    </thead>
+    <tbody id="pagecontent">
+        @if (Model.Count() == 0)
+        {
+            <tr class="gradeX">
+                <td class="center" colspan="8"><span class="text-danger">未检索到数据</span></td>
+            </tr>
+        }
+        else
+        {
+            foreach (var d in Model)
+            {
+            <tr class="gradeX" data-id="@d.ID">
+                <td>@d.Name</td>
+                <td class="center">@BCommon.GetNameByUserInfoID((int)d.LeaderID)</td>
+                <td class="center">@BCommon.GetNameByUserInfoID((int)d.CheckUserID)</td>
+                <td class="center" >@Html.Raw(BCommon.GetNumByPlanFlag((int)d.ID,"new"))</td>
+                <td class="center">@Html.Raw(BCommon.GetNumByPlanFlag((int)d.ID, "hascheck"))</td>
+                <td class="center">@Html.Raw(BCommon.GetNumByPlanFlag((int)d.ID, "notbegin"))</td>
+                <td class="center">@Html.Raw(BCommon.GetNumByPlanFlag((int)d.ID, "running"))</td>
+                <td class="center">@Html.Raw(BCommon.GetNumByPlanFlag((int)d.ID, "done"))</td>
+                <td class="center">@Html.Raw(BCommon.GetNumByPlanFlag((int)d.ID, "cancel"))</td>
+                <td class="left operate" >
+
+                    <a data-operate="scanPlan" class="operate">新需求/反馈</a>　
+                    <a data-operate="editprogress" class="operate">完成情况</a>　                    
+                    <a  class="operate" data-operate="scanGantt">甘特图</a>
+                    @if (flag)
+                    {
+                    <span> | </span>
+                    <a data-operate="editProject" class="operate">编辑项目</a>
+                    }
+                    @if (flag)
+                    {
+                      　<a class="operate text-muted" data-operate="ProjectDel">删除</a>
+                    }
+                </td>
+            </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<div class="row">
+    <div class="col-md-12">
+        <ul id="pagination" class="pagination  pull-right" data-pagecount="@(ViewData["pagecount"])" data-currentpage="@(ViewData["currentpage"])"
+             data-url="/Project/ProjectItem"></ul>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+$(function () {
+    LoadPagination();
+});
+</script>

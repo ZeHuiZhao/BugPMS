@@ -1,0 +1,130 @@
+﻿@using DBUtility;
+@model List<Maticsoft.Model.Privilege>
+@{
+    ConfigurationHelper config = new ConfigurationHelper();
+    string WebUrlPath = config.getConfigName("WebUrl");
+    Layout = null;
+}
+
+<table class="table table-hover table-striped  selfTable">
+    <thead>
+        <tr>
+            <th>
+                <input class="js_selectAll" type="checkbox" id="js_selectAll"/>
+            </th>
+            <th>编号</th>
+            <th>菜单名称</th>
+            <th>父级菜单</th>
+            <th>排序</th>
+            <th>链接地址</th>
+          
+            <th>状态</th>
+            <th>管 理 操 作</th>
+        </tr>
+    </thead>
+    <tbody id="pagecontent">
+        @if (ViewData["userinfoList"] != null)
+        {
+            foreach (Maticsoft.Model.Privilege d in Model)
+            {
+
+                string status = "";
+                status = d.Enable == 1 ? "<span class='yes'>已审核</span>" : "<span class='no'>禁用</span>";
+                <tr class="gradeX">
+                    <th>
+                        <input class="js_selectAll" type="checkbox" value="@(d.ID)" name="userSelector"/>
+                    </th>
+                    <td>@d.ID</td>
+                    <td>@d.Name</td>
+                    <td>@d.ParentID</td>
+                    <td>@d.DisplayOrder</td>
+                    <td>@d.Href</td>
+                   
+                    <td>@Html.Raw(status)</td>
+                    <td class="center">
+                        <a name="@d.ID" onclick="edit(this);">编辑</a>
+                        |<a class="reset" data-id="examine" name="@d.ID">审核</a>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+<div class="row">
+    <div class="col-md-12">
+        <ul id="pagination" class="pagination  pull-right" data-pagecount="@(ViewData["pagecount"])" data-currentpage="@(ViewData["currentpage"])"
+            data-url="/Privilege/TwoPrivilegeList"></ul>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+
+        //全选的实现
+        $("#js_selectAll").click(function () {
+            var f = $('#js_selectAll').prop("checked");
+            if (f == true) {
+                $("input[name='userSelector']").each(function () {
+                    $(this).prop("checked", true);
+                });
+            }
+            else {
+                $("input[name='userSelector']").each(function () {
+                    $(this).prop("checked", false);
+                });
+            }
+        });
+
+        $(".reset").click(function () {
+            var i = $(this).attr("name");//获取当前这条数据的ID值
+            var id = $(this).attr("data-id");//examine表示审核，ResetPassword重置密码
+
+            if (id == "examine")//审核
+            {
+                $.ajax({
+                    url: '@WebUrlPath/Json/ResetTwoPrivilegestatus/' + i,
+                    cache: false,
+                    error: function () {
+                        toastr.error("网络繁忙请稍后再试");
+                    },
+                    success: function (data) {
+                        if (data.Result == "success") {
+                            toastr.success(data.Message);
+                            //location.href = data.Address;
+                            loadPage();
+                        }
+                        else {
+                            toastr.error(data.Message);
+                        }
+                    }
+                });
+            }
+        });
+        //表单验证
+        $("#menuForm").validate({
+            rules: {
+                menuName: "required",
+                sort: {
+                    required: true,
+                    digits: true
+                },
+                hrefUrl: "required",
+                parentID: "required",
+            },
+            messages: {
+                menuName: "请输入菜单名称",
+                sort: {
+                    required: "请输入排序",
+                    digits: "只能输入整数"
+                },
+                hrefUrl: "请输入链接地址",
+                parentID: "请选择所属菜单"
+            }
+        });
+    });
+</script>
+<script type="text/javascript">
+$(function () {
+    LoadPagination();
+});
+</script>

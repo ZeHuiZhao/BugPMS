@@ -1,0 +1,271 @@
+﻿@using DBUtility;
+@model Maticsoft.Model.Privilege
+@{
+    ConfigurationHelper config = new ConfigurationHelper();
+    string WebUrlPath = config.getConfigName("WebUrl");
+    Layout = WebUrlPath + "/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "一级菜单";
+}
+
+
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                    <div class="navbar-header">
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary addbtn-primary" href="#">
+                            <i class="fa fa-bars"> </i>
+                        </a>
+                    </div>
+                    <div class="add_button">
+                        <button class="btn btn-primary headbtn-primary" type="button" id="addMenu">
+                            <i class="fa fa-plus"></i>
+                            添加一级菜单
+                        </button>
+                    </div>
+                </nav>
+            </div>
+            <div class="row wrapper border-bottom white-bg page-heading selfpage-heading">
+                <form class="form-horizontal" id="search">
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    @Html.TextBoxFor(m => m.Name, new { @class = "form-control", placeholder = "菜单名称" })
+                                </div>
+                                 
+                                <div class="col-md-2">
+                                    <input type="button" value="筛   选" id="submit" class="btn btn-primary" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input id="Currentpage" name="Currentpage" type="hidden" value="@ViewData["currentpage"]" readonly="readonly" />
+                </form>
+            </div>
+            <div class="wrapper wrapper-content animated fadeInRight">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title">
+                                <h5>菜单 | 管理</h5>
+                            </div>
+                            <div class="mc-content ibox-content">
+                                @Html.Action("FirstPrivilegeList", "Privilege")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+<!-- Model -->
+<div class="modal inmodal" id="menuModal" ria-labelledby="menuModalLabel" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeInDown">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                    <h4 class="modal-title" id="modal-title">菜单管理</h4>
+                </div>
+                <div class="modal-body position_r clearfix">
+                    <form class="form-horizontal" id="menuForm">
+                        <input type="hidden" id="ID" name="ID" value="0" />
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">菜单名称</label>
+                            <div class="col-sm-10"><input class="form-control" type="text" id="menuName" name="menuName"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">排序</label>
+                            <div class="col-sm-10"><input class="form-control" type="text" id="sort" name="sort"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">样式</label>
+                            <div class="col-sm-10"><input class="form-control" type="text" id="menuClass" name="menuClass"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-white" type="button" id="cancleb">取消</button>
+                    <input type="submit" id="submitBtn" value="确认" class="btn btn-primary" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+@section BodyBottom{
+    <script type="text/javascript">
+        var pageModel = $("#menuModal");//模态框
+        var hideId = $("#ID");
+        var modalTitle = $("#modal-title");
+
+        $(function () {
+            //全选的实现
+            $("#js_selectAll").click(function () {
+                var f = $('#js_selectAll').prop("checked");
+                if (f == true) {
+                    $("input[name='userSelector']").each(function () {
+                        $(this).prop("checked", true);
+                    });
+                }
+                else {
+                    $("input[name='userSelector']").each(function () {
+                        $(this).prop("checked", false);
+                    });
+                }
+            });
+
+            $("div.mc-content").on('click', 'a.reset', function () {
+                var i = $(this).attr("name");//获取当前这条数据的ID值
+                var id = $(this).attr("data-id");//examine表示审核，ResetPassword重置密码
+
+                if (id == "examine")//审核
+                {
+                    $.ajax({
+                        url: '@WebUrlPath/Json/ResetFirstPrivilegestatus/' + i,
+                        cache: false,
+                        error: function () {
+                            toastr.error("网络繁忙请稍后再试");
+                        },
+                        success: function (data) {
+                            if (data.Result == "success") {
+                                toastr.success(data.Message);
+                                loadPage();
+                            }
+                            else {
+                                toastr.error(data.Message);
+                            }
+                        }
+                    });
+                }
+            });
+            //表单验证
+            $("#menuForm").validate({
+                rules: {
+                    menuName: "required",
+                    sort: {
+                        required: true,
+                        digits: true
+                    },
+                    menuClass: "required"
+                },
+                messages: {
+                    menuName: "请输入菜单名称",
+                    sort: {
+                        required: "请输入排序",
+                        digits: "只能输入整数"
+                    },
+                    menuClass: "请输入菜单样式"
+                }
+            });
+
+            //添加
+            $("#addMenu").click(function () {
+                modalTitle.html("添加一级菜单");
+                hideId.val(0);
+                pageModel.modal("show");
+            });
+
+            //确认添加or修改
+            $("#submitBtn").click(function () {
+                if ($("#menuForm").valid()) {
+
+                    var menuName = $("#menuName").val();
+                    var sort = $("#sort").val();
+                    var menuClass = $("#menuClass").val();
+
+                    var ID = hideId.val();
+                    if (ID == 0) {//添加
+                        $.ajax({
+                            type: "POST",
+                            url: '@WebUrlPath/Json/AddFirstPrivilege',
+                            data: { Name: menuName, DisplayOrder: sort, CssStyle: menuClass },
+                            cache: false,
+                            success: function (data) {
+                                if (data.Result == "success")//成功
+                                {
+                                    toastr.success(data.Message);
+                                    location.href = data.Address;
+
+                                    clear();
+                                }
+                                else if (data.Result == "error") {
+                                    toastr.error(data.Message);
+                                }
+                                else if (data.Result == "false") {
+                                    toastr.error(data.Message);
+                                }
+                            },
+                            error: function () {
+                                toastr.error("网络繁忙请稍后再试");
+                            }
+                        });
+                    }
+                    else {//编辑
+                        $.ajax({
+                            type: "POST",
+                            url: '@WebUrlPath/Json/updateFirstPrivilege',
+                            data: { ID: ID, Name: menuName, DisplayOrder: sort, CssStyle: menuClass },
+                            cache: false,
+                            success: function (data) {
+                                if (data.Result == "success")//成功
+                                {
+                                    toastr.success(data.Message);
+                                    location.href = data.Address;
+
+                                    clear();
+                                }
+                                else if (data.Result == "error") {
+                                    toastr.error(data.Message);
+                                }
+                                else if (data.Result == "false") {
+                                    toastr.error(data.Message);
+                                }
+                            },
+                            error: function () {
+                                toastr.error("网络繁忙请稍后再试");
+                            }
+                        });
+                    }
+                }
+
+            });
+
+            //取消编辑or添加
+            $("button[data-dismiss='modal']").click(function () {
+                clear();
+            });
+        });
+
+        //编辑
+        function edit(curDom) {
+            modalTitle.html("编辑菜单");
+            var id = $(curDom).attr('name');
+            hideId.val(id);
+
+            //获取详情
+            $.ajax({
+                type: "POST",
+                url: "@WebUrlPath/Json//GetMessage",
+                data: { ID: id },
+                success: function (rs) {
+                    var singleModel = JSON.parse(rs);
+
+                    $("#menuName").val(singleModel[0].Name);
+                    $("#sort").val(singleModel[0].DisplayOrder);
+                    $("#menuClass").val(singleModel[0].CssStyle);
+
+                    pageModel.modal("show");
+                }
+            });
+        };
+
+
+        //清空
+        function clear() {
+            $("#menuName").val("");
+            $("#sort").val("");
+            $("#menuClass").val("");
+        }
+         
+    </script>
+
+}

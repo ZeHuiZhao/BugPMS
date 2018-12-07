@@ -1,0 +1,264 @@
+﻿@using DBUtility;
+@model Maticsoft.Model.Role
+@{
+    ConfigurationHelper config = new ConfigurationHelper();
+    string WebUrlPath = config.getConfigName("WebUrl");
+    Layout = WebUrlPath + "/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "角色 | 管理";
+}
+
+
+<div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                    <div class="navbar-header">
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary addbtn-primary" href="#">
+                            <i class="fa fa-bars"> </i>
+                        </a>
+                    </div>
+                    <div class="add_button">
+                        <button class="btn btn-primary headbtn-primary" type="button" id="addRole">
+                            <i class="fa fa-plus"></i>
+                            添加角色
+                        </button>
+                        <button type="button" class="btn btn-danger headbtn-primary" id="delRole">
+                            <i class="fa fa-times"></i>
+                            删除所选
+                        </button>
+                    </div>
+                </nav>
+            </div>
+<div class="row wrapper border-bottom white-bg page-heading selfpage-heading">
+                <form class="form-horizontal" id="search">
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    @Html.TextBoxFor(m => m.Name, new { @class = "form-control", placeholder = "角色名称" })
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="button" value="筛   选" id="submit" class="btn btn-primary" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+<div class="wrapper wrapper-content animated fadeInRight">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title">
+                                <h5>角色 | 管理</h5>
+                            </div>
+                            <div class="mc-content ibox-content">
+                                @Html.Action("RoleList", "admin")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+           
+
+<div class="modal inmodal" id="roleModal" ria-labelledby="roleModalLabel" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeInDown">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                    <h4 class="modal-title">增加用户</h4>
+                </div>
+                <div class="modal-body position_r clearfix">
+                    <form class="form-horizontal" id="roleForm">
+                        <input type="hidden" id="roleId" name="roleId"  value="0"/>
+                        <div class="form-group">
+                            <label class="col-lg-2 control-label">角色名</label>
+                            <div class="col-lg-10">
+                                <input placeholder="角色名" class="form-control" type="text" name="roleName" id="roleName" required>
+                            </div>
+                        </div>                       
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal" class="btn btn-white" type="button" id="cancleb">取消</button>
+                    <input type="submit" id="submitBtn" value="确认" class="btn btn-primary" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+@section BodyBottom{
+<script type="text/javascript">
+        var pageModel = $("#roleModal");//模态框
+        var hideId = $("#roleId");
+        var modalTitle = $(".modal-title");
+        var formModel = $("#roleForm");
+
+        $(function () {
+
+            //全选的实现
+            $("#js_selectAll").click(function () {
+                var f = $('#js_selectAll').prop("checked");
+                if (f == true) {
+                    $("input[name='userSelector']").each(function () {
+                        $(this).prop("checked", true);
+                    });
+                }
+                else {
+                    $("input[name='userSelector']").each(function () {
+                        $(this).prop("checked", false);
+                    });
+                }
+            });
+
+         
+            //添加
+            $("#addRole").click(function () {
+                modalTitle.html("添加角色");
+                hideId.val(0);
+                pageModel.modal("show");
+            });
+            //删除
+            $("#delRole").click(function () {
+                var delIds = "";
+                $("input[name='userSelector']:checked").each(function (i) {
+                    delIds = delIds + ',' + $(this).val();
+                });
+                delIds = dropRsplit(delIds, ",");
+
+                if (delIds != "") {
+                    if (confirm("确认要删除吗？")) {
+                        $.ajax({
+                            type: "POST",
+                            url: '@WebUrlPath/Json/deleteRole',
+                            data: { IDS: delIds },
+                            cache: false,
+                            success: function (data) {
+                                if (data.Result == "success")//删除成功
+                                {
+                                    location.href = data.Address;
+                                    toastr.success(data.Message);
+                                }
+                                else if (data.Result == "error") {
+                                    toastr.error(data.Message);
+                                }
+                            },
+                            error: function () {
+                                toastr.error("网络繁忙请稍后再试");
+                            }
+                        });
+                    }
+                }
+                else {
+                    toastr.error("请选择删除对象！");
+                }
+
+            });
+
+            //确认添加or修改
+            $("#submitBtn").click(function () {
+                if (formModel.valid()) {
+
+                    var roleName = $("#roleName").val();
+
+                    var roleId = hideId.val();
+                    if (roleId == 0) {//添加
+                        $.ajax({
+                            type: "POST",
+                            url: '@WebUrlPath/Json/addRole',
+                            data: { Name: roleName },
+                            cache: false,
+                            success: function (data) {
+                                if (data.Result == "success")//成功
+                                {
+                                    toastr.success(data.Message);
+                                    location.href = data.Address;
+                                }
+                                else if (data.Result == "error") {
+                                    toastr.error(data.Message);
+                                }
+                                else if (data.Result == "false") {
+                                    toastr.error(data.Message);
+                                }
+                            },
+                            error: function () {
+                                toastr.error("网络繁忙请稍后再试");
+                            }
+                        });
+                    }
+                    else {//编辑
+
+                        $.ajax({
+                            type: "POST",
+                            url: '@WebUrlPath/Json/UpdateRole',
+                            data: { ID: roleId, Name: roleName },
+                            cache: false,
+                            success: function (data) {
+                                if (data.Result == "success")//成功
+                                {
+                                    toastr.success(data.Message);
+                                    location.href = data.Address;
+                                }
+                                else if (data.Result == "error") {
+                                    toastr.error(data.Message);
+                                }
+                                else if (data.Result == "false") {
+                                    toastr.error(data.Message);
+                                }
+                            },
+                            error: function () {
+                                toastr.error("网络繁忙请稍后再试");
+                            }
+                        });
+                    }
+
+                    clear();
+                }
+
+            });
+
+            //表单验证
+            formModel.validate({
+                rules: {
+                    roleName: "required",
+                },
+                messages: {
+                    roleName: "请输入角色名称",
+                }
+            });
+
+            //取消编辑or添加
+            $("button[data-dismiss='modal']").click(function () {
+                clear();
+            });
+        });
+
+
+        //编辑
+        function edit(curDom) {
+            modalTitle.html("编辑角色");
+            var id = $(curDom).attr('name');
+            hideId.val(id);
+
+            //获取详情
+            $.ajax({
+                type: "POST",
+                url: "@WebUrlPath/Json/getRole",
+                data: { ID: id },
+                success: function (rs) {
+                    var singleModel = JSON.parse(rs);
+
+                    $("#roleName").val(singleModel[0].Name);
+
+                    pageModel.modal("show");
+                }
+            });
+        };
+
+        function clear() {
+            $("#roleName").val("");
+        }
+    </script>
+
+}
+

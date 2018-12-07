@@ -1,0 +1,243 @@
+﻿@model Maticsoft.Model.Project
+@using DBUtility;
+@{
+    ViewBag.Title = "新增项目";
+    ConfigurationHelper config = new ConfigurationHelper();
+    string WebUrlPath = config.getConfigName("WebUrl");
+    Layout = WebUrlPath + "/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="row border-bottom">
+<nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+    <div class="navbar-header">
+        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary addbtn-primary" href="#">
+            <i class="fa fa-bars"></i>
+        </a>
+    </div>
+    <div class="add_button">
+       
+    </div>
+</nav>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox-title">
+                <h5 id="Pagetitle">新增项目</h5>
+            </div>
+            <div class="ibox-content">
+                <form id="Form" class="form-horizontal">
+                    @*<div class="form-group">
+                        <label class="col-sm-3 control-label">项目编号</label>
+                        <div class="col-sm-3"><input class="form-control" name="Code" type="text" id="Code" disabled>（自动生成）</div>
+                    </div>*@
+                    <div class="hr-line-dashed"></div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">项目名称</label>
+                        <div class="col-sm-3"><input class="form-control" name="Name" type="text" id="Name" data-need="true"><span style="display:none;"><input id="ID" name="ID" type="text" /></span></div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">项目类型</label>
+                        <div class="col-sm-3">
+                            <select class="form-control" id="ProjectTypeID" name="ProjectTypeID" data-need="true"></select>
+                        </div>                        
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">项目负责人</label>
+                        <div class="col-sm-3">
+                            <select class="form-control" id="LeaderID" name="LeaderID" data-need="true"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">审批人</label>
+                        <div class="col-sm-3">
+                            <select class="form-control" id="CheckUserID" name="CheckUserID" data-need="true"></select>
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">起始日期</label>
+                        <div class="col-sm-3 input-group" id="datepicker">
+                            <input type="text" class="form-control pickerdate" name="PlanStartTime" onfocus="WdatePicker({ readOnly: true })" id="PlanStartTime" />
+                            <span class="input-group-addon">to</span>
+                            <input type="text" class="form-control pickerdate" name="PlanEndTime" onfocus="WdatePicker({ readOnly: true })" id="PlanEndTime" />
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">项目概述</label>
+                        <div class="col-sm-3"><textarea class="form-control input-lg h-200" name="Contents" type="text" id="Contents" data-need="true" ></textarea></div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <div class="form-group" style="height:50px;">
+                        <div class="col-sm-4">
+                            <button class="btn btn-primary pull-right" type="button" id="summitChange">
+                                <i class="fa fa-check"></i>
+                                提交
+                            </button>
+                        </div>
+                    </div>
+                </form>
+               
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section BodyBottom{
+    <script type="text/javascript">
+        $(function () {
+            //项目类型
+            $.ajax({
+                type: "POST",
+                url: "@WebUrlPath/Json/getBaseData",
+                data: { TableName: 'ProjectType' },
+                success: function (result) {
+                    var pHtml = "<option value=''>--请选择--</option>";
+                    var data = JSON.parse(result);
+                    for (var i = 0; i < data.length; i++) {
+                        pHtml += "<option value='" + data[i].KeyID + "'>" + data[i].Name + "</option>"
+                    }
+                    $("#ProjectTypeID").html(pHtml);
+                    bindmsg();
+                },
+                error: function b(ms) {
+                    alert("请求失败，请按F5刷新！");
+                    return;
+                }
+            });
+
+            //项目组长
+            $.ajax({
+                type: "POST",
+                url: "@WebUrlPath/Json/getUserList",
+                success: function (result) {
+                    var pHtml = "<option value=''>--请选择--</option>";
+                    var data = JSON.parse(result);
+                    var name = "";
+                    for (var i = 0; i < data.length; i++) {
+                        @*if (data[i].ID == "@Model.LeaderID"){
+                            name = data[i].TrueName;
+                        }*@
+                        pHtml += "<option value='" + data[i].ID + "'>" + data[i].TrueName + "</option>"
+                    }
+                    $("#LeaderID").html(pHtml);
+                    $("#CheckUserID").html(pHtml);
+                    bindmsg();
+                    @*if (name == "")
+                    {
+                        name="@Session["TrueName"].ToString()";
+                    }
+                    $("#LeaderName").text(name);*@
+                },
+                error: function b(ms) {
+                    alert("请求失败，请按F5刷新！");
+                    return;
+                }
+            });
+            $("[data-need='true']").blur(function () {
+                if ($(this).val() == ("" | "0")) {
+                    $(this).parent().parent().addClass("has-error");
+                } else {
+                    $(this).parent().parent().removeClass("has-error");
+                }
+            });
+            $("#summitChange").click(function () {
+                var msg = "请填写完整";
+                var flag = true;
+                $("input[data-need='true']").each(function () {
+                    if ($(this).val() == "") {
+                        $(this).parent().parent().addClass("has-error");
+                        flag = false;
+                    } else {
+                        $(this).parent().parent().removeClass("has-error");
+                    }
+                });
+                $("textarea[data-need='true']").each(function () {
+                    if ($(this).val() == "") {
+                        $(this).parent().parent().addClass("has-error");
+                        flag = false;
+                    } else {
+                        $(this).parent().parent().removeClass("has-error");
+                    }
+                });
+                $("select[data-need='true']").each(function () {
+                    if ($(this).val() == "") {
+                        $(this).parent().parent().addClass("has-error");
+                        flag = false;
+                    } else {
+                        $(this).parent().parent().removeClass("has-error");
+                    }
+                });
+                $("input.pickerdate").each(function () {
+                    if ($(this).val() == "") {
+                        msg = "请选择日期";
+                        flag = false;
+                        return;
+                    }
+                });
+
+
+                if (flag) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@WebUrlPath/Json/AddProject',
+                        data: $("#Form").serialize(),
+                        cache: false,
+                        success: function (data) {
+                            if (data.Result == "success")//修改成功
+                            {
+                                toastr.success(data.Message);
+                                location.href = data.Address;
+                            }
+                            else {
+                                toastr.error(data.Message);
+                            }
+                        },
+                        error: function () {
+                            toastr.error("网络繁忙请稍后再试");
+                        }
+                    });
+                }
+                else {
+                    toastr.warning(msg);
+                }
+            });
+          
+        });
+    </script>
+@if (Model != null&&Model.ID>0)
+{
+    <script type="text/javascript">
+        function bindmsg()
+        {
+                $("#ID").val("@Model.ID");
+                $("#Code").val("@Model.Code");
+                $("#Name").val("@Model.Name");
+                $("#ProjectTypeID").val("@Model.ProjectTypeID");
+                $("#LeaderID").val("@Model.LeaderID");
+                $("#CheckUserID").val("@Model.CheckUserID");            
+                $("#PlanStartTime").val("@Convert.ToDateTime(Model.PlanStartTime).ToString("yyyy-MM-dd")");
+                $("#PlanEndTime").val("@Convert.ToDateTime(Model.PlanEndTime).ToString("yyyy-MM-dd")");
+                $("#Contents").val("@Model.Contents");
+                $("#Pagetitle").text("修改项目");
+
+        };
+    </script>
+}
+else
+{
+    <script type="text/javascript">
+        function bindmsg()
+        {//防止因无输出内容导致出现该函数未定义的bug；       
+         };
+    </script>
+}
+
+}

@@ -1,0 +1,54 @@
+﻿@model Maticsoft.Model.Project
+@using DBUtility;
+@{
+    ConfigurationHelper config = new ConfigurationHelper();
+    string WebUrlPath = config.getConfigName("WebUrl");
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>项目进度</title>
+    <script src="@WebUrlPath/Scripts/jquery-2.1.1.js"></script>
+    <link href="@WebUrlPath/Scripts/commonJS/gantt/gantt.css" rel="stylesheet" />
+    <script src="@WebUrlPath/Scripts/commonJS/gantt/Gantt.js"></script>
+    
+</head>
+<body>
+
+   <div id="table"> </div>
+
+    <script type="text/javascript">
+            $(function () {
+                dataLeft = [
+                 {
+                     
+                     Content: "需求/bug描述", Target: "目标/期望",PlanStartTime:"计划开始时间",PlanEndTime:"计划完成时间",
+                     RealStartTime:"实际开始时间",RealEndTime:"实际完成时间",Result:"完成情况",Note:"备注"
+                     ,"data-StartDate": "开始时间", "data-EndDate": "结束时间"
+                 }
+                 @Html.Raw(ViewData["LeftJson"].ToString())
+                ];
+                dataUser = [
+                     { aName: "", bName: "", cName: "", dName: "" },
+                    {aName: "负责人", bName: "审核人", cName: "需求提出", dName: "需求完成"},
+                    
+                    @Html.Raw(ViewData["UserJson"].ToString())
+                ];
+                dataCustom = [ ];
+                opts = {
+                    title: "@Model.Name"+"工作计划",
+                    dataLeft: dataLeft,//含ID,标题，内容，起止时间，标识flag
+                    dataUser: dataUser,
+                    dataCustom: dataCustom,
+                    showCheckbox: false,
+                    showEdit: false
+                };
+                $("#table").gantt(opts);
+            });
+
+    </script>
+    
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+﻿@using DBUtility;
+@{
+    ConfigurationHelper config = new ConfigurationHelper();
+    string WebUrlPath = config.getConfigName("WebUrl");
+    Layout = WebUrlPath + "/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "首页";
+}
+
+<script type="text/javascript">
+    location.href = "@WebUrlPath/Project/ProjectList";
+</script>

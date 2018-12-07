@@ -1,0 +1,300 @@
+﻿@using DBUtility;
+@{
+    ViewBag.Title = "字典维护";
+    ConfigurationHelper config = new ConfigurationHelper();
+    string WebUrlPath = config.getConfigName("WebUrl");
+    Layout = WebUrlPath + "/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<div class="row border-bottom">
+    <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <div class="navbar-header">
+            <a class="navbar-minimalize minimalize-styl-2 btn btn-primary addbtn-primary" href="#">
+                <i class="fa fa-bars"> </i>
+            </a>
+        </div>
+        <div class="add_button">
+            <button class="btn btn-primary headbtn-primary" type="button" id="add">
+                <i class="fa fa-plus"></i>
+                添加字典数据
+            </button>
+            <button type="button" class="btn btn-danger headbtn-primary" id="del">
+                <i class="fa fa-times"></i>
+                删除所选
+            </button>
+        </div>
+    </nav>
+</div>
+<div class="row wrapper border-bottom white-bg page-heading selfpage-heading">
+    <form class="form-horizontal" id="search">
+        <div class="form-group">
+            <div class="col-sm-12">
+                <div class="row">
+                    <div class="col-md-2">
+                        <input type="text" class="form-control" placeholder="字典表名称" name="SearchName" id="SearchName" />
+                    </div>
+                    <div class="col-md-2">
+                        <input type="button" value="筛   选" id="submit" class="btn btn-primary" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>字典 | 管理</h5>
+                </div>
+                <div class="mc-content ibox-content">
+                    @Html.Action("DictionaryItem", "Data")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal inmodal" id="Modal" ria-labelledby="ModalLabel" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal-dialog">
+    <div class="modal-content animated fadeInDown">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">
+                <span aria-hidden="true">×</span>
+            </button>
+            <h4 class="modal-title">添加字典数据</h4>
+        </div>
+        <div class="modal-body position_r clearfix">
+            <form class="form-horizontal" id="Form">
+                <input type="hidden" id="ID" name="ID" value="0" />
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">字典表名称</label>
+                    <div class="col-lg-9">
+                        <input placeholder="字典表名称" class="form-control" type="text" name="TableName" id="TableName" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">主键ID</label>
+                    <div class="col-lg-9">
+                        <input placeholder="主键ID（KeyID）" class="form-control" type="text" name="KeyID" id="KeyID" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">字段值</label>
+                    <div class="col-lg-9">
+                        <input placeholder="字段值（KeyValue）" class="form-control" type="text" name="Name" id="Name" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">是否可用</label>
+                    <div class="col-lg-9">
+                        <label>
+                            <input type="radio" value="0" id="IsActive1" name="IsActive">不可用　
+                        </label>
+                        <label>
+                            <input type="radio" value="1" id="IsActive2" name="IsActive">可用
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-lg-3 control-label">显示顺序</label>
+                    <div class="col-lg-9">
+                        <input placeholder="显示顺序" class="form-control" type="text" name="Display" id="Display" required>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button data-dismiss="modal" class="btn btn-white" type="button" id="cancleb">取消</button>
+            <input type="button" id="submitBtn" value="确认" class="btn btn-primary" />
+        </div>
+    </div>
+</div>
+</div>
+
+@section BodyBottom{
+    <script type="text/javascript">
+        var pageModel = $("#Modal");//模态框
+        var hideId = $("#ID");
+        var modalTitle = $(".modal-title");
+        var formModel = $("#Form");
+
+        $(function () {
+           
+            //添加
+            $("#add").click(function () {
+                clear();
+                modalTitle.html("添加字典数据");
+                hideId.val(0);
+                pageModel.modal("show");
+            });
+            //删除
+            $("#del").click(function () {
+                var delIds = "";
+                $("input[name='userSelector']:checked").each(function (i) {
+                    delIds = delIds + ',' + $(this).val();
+                });
+                delIds = dropRsplit(delIds, ",");
+
+                if (delIds != "") {
+                    if (confirm("确认要删除吗？")) {
+                        $.ajax({
+                            type: "POST",
+                            url: '@WebUrlPath/Json/DelDictionary',
+                            data: { IDS: delIds },
+                            cache: false,
+                            success: function (data) {
+                                if (data.Result == "success")//删除成功
+                                {
+                                    location.href = data.Address;
+                                    toastr.success(data.Message);
+                                }
+                                else if (data.Result == "error") {
+                                    toastr.error(data.Message);
+                                }
+                            },
+                            error: function () {
+                                toastr.error("网络繁忙请稍后再试");
+                            }
+                        });
+                    }
+                }
+                else {
+                    toastr.error("请选择删除对象！");
+                }
+
+            });
+
+            //确认添加or修改
+            $("#submitBtn").click(function () {
+                if (formModel.valid()) {
+                    var Name = $("#Name").val();
+                    var roleId = hideId.val();
+                    if (roleId == 0) {//添加
+                        $.ajax({
+                            type: "POST",
+                            url: '@WebUrlPath/Json/addDictionary',
+                            data: $("#Form").serialize(),
+                            cache: false,
+                            success: function (data) {
+                                if (data.Result == "success")//成功
+                                {
+                                    toastr.success(data.Message);
+                                    location.href = data.Address;
+                                }
+                                else if (data.Result == "error") {
+                                    toastr.error(data.Message);
+                                }
+                                else if (data.Result == "false") {
+                                    toastr.error(data.Message);
+                                }
+                            },
+                            error: function () {
+                                toastr.error("网络繁忙请稍后再试");
+                            }
+                        });
+                    }
+                    else {//编辑
+
+                        $.ajax({
+                            type: "POST",
+                            url: '@WebUrlPath/Json/UpdateDictionary',
+                            data: $("#Form").serialize(),
+                            cache: false,
+                            success: function (data) {
+                                if (data.Result == "success")//成功
+                                {
+                                    toastr.success(data.Message);
+                                    location.href = data.Address;
+                                }
+                                else if (data.Result == "error") {
+                                    toastr.error(data.Message);
+                                }
+                                else if (data.Result == "false") {
+                                    toastr.error(data.Message);
+                                }
+                            },
+                            error: function () {
+                                toastr.error("网络繁忙请稍后再试");
+                            }
+                        });
+                    }
+                    clear();
+                }
+
+            });
+
+            //表单验证
+            formModel.validate({
+                rules: {
+                    Name: "required",
+                },
+                messages: {
+                    Name: "请输入部门名称",
+                }
+            });
+
+            //取消编辑or添加
+            $("button[data-dismiss='modal']").click(function () {
+                clear();
+            });
+            //全选的实现
+            $("#js_selectAll").click(function () {
+                var f = $('#js_selectAll').prop("checked");
+                if (f == true) {
+                    $("input[name='userSelector']").each(function () {
+                        $(this).prop("checked", true);
+                    });
+                }
+                else {
+                    $("input[name='userSelector']").each(function () {
+                        $(this).prop("checked", false);
+                    });
+                }
+            });
+        });
+
+        //编辑
+        function edit(curDom) {
+            clear();
+            modalTitle.html("修改字典数据");
+            var id = $(curDom).attr('name');
+            hideId.val(id);
+
+            //获取详情
+            $.ajax({
+                type: "POST",
+                url: "@WebUrlPath/Json/getDictionary",
+                data: { ID: id },
+                success: function (rs) {
+                    var singleModel = JSON.parse(rs);
+                    $("#TableName").val(singleModel[0].TableName);
+                    $("#Name").val(singleModel[0].Name);                    
+                    $("#KeyID").val(singleModel[0].KeyID);
+                    $("#Display").val(singleModel[0].Display);
+                    $("input[name=IsActive][value=" + singleModel[0].IsActive + "]").prop("checked", 'checked');
+                    pageModel.modal("show");
+                }
+            });
+
+        };
+
+        function clear() {
+            $("#TableName").val("");
+            $("#Name").val("");
+            $("input[name=IsActive]:eq(0)").prop("checked", 'checked');
+            $("#KeyID").val("");
+            $("#Display").val("");
+        }
+
+</script>
+
+}
+
+
+

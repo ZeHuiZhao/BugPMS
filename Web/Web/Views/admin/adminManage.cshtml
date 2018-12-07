@@ -1,0 +1,306 @@
+﻿@using DBUtility;
+@model Maticsoft.Model.UserInfo
+@{
+    ConfigurationHelper config = new ConfigurationHelper();
+    string WebUrlPath = config.getConfigName("WebUrl");
+    Layout = WebUrlPath+"/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "用户 | 管理";
+}
+
+
+<div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                    <div class="navbar-header">
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary addbtn-primary" href="#">
+                            <i class="fa fa-bars"> </i>
+                        </a>
+                    </div>
+                    <div class="add_button">
+                        <button class="btn btn-primary headbtn-primary" type="button" id="addUser">
+                            <i class="fa fa-plus"></i>
+                            添加用户
+                        </button>
+                    </div>
+                </nav>
+            </div>
+<div class="row wrapper border-bottom white-bg page-heading selfpage-heading">
+                <form class="form-horizontal" id="search">
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", placeholder = "用户名" })
+                                </div>
+                                <div class="col-md-2">
+                                    @Html.TextBoxFor(m => m.TrueName, new { @class = "form-control", placeholder = "真实姓名" })
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="button" value="筛   选" id="submit" class="btn btn-primary" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input id="Currentpage" name="Currentpage" type="hidden" value="@ViewData["currentpage"]" readonly="readonly" />
+                </form>
+            </div>
+<div class="wrapper wrapper-content animated fadeInRight">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title">
+                                <h5>用户 | 管理</h5>
+                            </div>
+                            <div class="mc-content ibox-content">
+                                @Html.Action("adminList", "admin")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+<div class="modal inmodal" id="addUserModal" ria-labelledby="addUserModalLabel" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content animated fadeInDown">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <h4 class="modal-title">添加用户</h4>
+                    </div>
+                    <div class="modal-body position_r clearfix">
+                        <form class="form-horizontal" id="addAdminForm">
+                            <input type="hidden" id="userId" value="0" />
+                            <div class="form-group">
+                                <label class="col-lg-2 control-label">用户名</label>
+                                <div class="col-lg-10">
+                                    <input placeholder="用户名" class="form-control" type="text" name="ausername" id="ausername">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-lg-2 control-label">姓名</label>
+                                <div class="col-lg-10">
+                                    <input placeholder="真实姓名" class="form-control" type="text" name="atruename" id="atruename">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-lg-2 control-label">密码</label>
+                                <div class="col-lg-10">
+                                    <input placeholder="密码" class="form-control" type="password" name="apassword" id="apassword">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-lg-2 control-label">确认密码</label>
+                                <div class="col-lg-10">
+                                    <input placeholder="确认密码" class="form-control" type="password" name="confirm_password" id="confirm_password">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-lg-2 control-label">选择角色</label>
+                                <div class="col-sm-10">
+                                    <select class="form-control m-b" id="roleList" name="roleList"></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-lg-2 control-label">选择部门</label>
+                                <div class="col-sm-10">
+                                    <select class="form-control m-b" id="DepartmentList" name="DepartmentList"></select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button data-dismiss="modal" class="btn btn-white" type="button" id="cancleb">取消</button>
+                        <input type="submit" id="adduserInfo" value="确认" class="btn btn-primary" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+@section BodyBottom{
+<script type="text/javascript">
+        var pageModel = $("#addUserModal");//模态框
+        var hideId = $("#userId");
+        var modalTitle = $(".modal-title");
+
+        $(function () {
+
+            //角色选项
+            $.ajax({
+                type: "POST",
+                url: "@WebUrlPath/Json/getRoleList",
+                success: function (result) {
+                    var pHtml = "<option value=''>--请选择--</option>";
+                    var data = JSON.parse(result);
+                    for (var i = 0; i < data.length; i++) {
+                        pHtml += "<option value='" + data[i].ID + "'>" + data[i].Name + "</option>"
+                    }
+                    $("#roleList").html(pHtml);
+                },
+                error: function b(ms) {
+                    alert("请求失败，请按F5刷新！");
+                    return;
+                }
+            });
+            //部门选项
+            $.ajax({
+                type: "POST",
+                url: "@WebUrlPath/Json/getDepartmentList",
+                success: function (result) {
+                    var pHtml = "<option value=''>--请选择--</option>";
+                    var data = JSON.parse(result);
+                    for (var i = 0; i < data.length; i++) {
+                        pHtml += "<option value='" + data[i].ID + "'>" + data[i].Name + "</option>"
+                    }
+                    $("#DepartmentList").html(pHtml);
+                },
+                error: function b(ms) {
+                    alert("请求失败，请按F5刷新！");
+                    return;
+                }
+            });
+
+            //添加
+            $("#addUser").click(function () {
+                modalTitle.html("添加用户");
+                hideId.val(0);
+                $("#ausername").removeAttr("disabled");
+                $("#apassword").removeAttr("disabled");
+                $("#confirm_password").removeAttr("disabled");
+                pageModel.modal("show");
+            });
+
+            $("#adduserInfo").click(function () {
+                if ($("#addAdminForm").valid()) {
+                    var ausername = $("#ausername").val();//用户名
+                    var atruename = $("#atruename").val();//姓名
+                    var apassword = $("#apassword").val();//密码
+                    var confirm_password = $("#confirm_password").val();//确认密码
+                    var roleId = $("#roleList").val();
+                    var Department = $("#DepartmentList").val();
+                    if (ausername.indexOf("-") != -1) {
+                        toastr.error("用户名不能包含 - 符号");
+                    }
+                    else {
+                        var userId = hideId.val();
+                        if (roleId != "" && Department != "") {
+                            if (userId == 0) {//添加
+                                $.ajax({
+                                    type: "POST",
+                                    url: '@WebUrlPath/Json/addadmins',
+                                    data: { username: ausername, password: apassword, roleID: roleId, TrueName: atruename, DepartmentID: Department },
+                                    cache: false,
+                                    success: function (data) {
+                                        if (data.Result == "success")//成功
+                                        {                                           
+                                            toastr.success(data.Message);
+                                            pageModel.modal("hide");
+                                            loadPage();
+
+                                            clear();
+                                        }
+                                        else if (data.Result == "errorcheck")//用户已存在
+                                        {
+                                            toastr.error(data.Message);
+                                        }
+                                        else if (data.Result == "false")//修改失败
+                                        {
+                                            toastr.error(data.Message);
+                                        }
+                                        else {
+                                            toastr.error(data.Message);
+                                        }
+                                    },
+                                    error: function () {
+                                        toastr.error("网络繁忙请稍后再试");
+                                    }
+                                });
+                            } else {//修改
+                                $.ajax({
+                                    type: "POST",
+                                    url: '@WebUrlPath/Json/updateadmins',
+                                    data: { ID: userId, roleID: roleId, TrueName: atruename, DepartmentID: Department },
+                                    cache: false,
+                                    success: function (data) {
+                                        if (data.Result == "success")//修改成功
+                                        {
+                                            
+                                            toastr.success(data.Message);
+                                            pageModel.modal("hide");
+                                            loadPage();
+                                            clear();
+                                        }
+                                        else if (data.Result == "error") {
+                                            toastr.error(data.Message);
+                                        }
+                                        else {
+                                            toastr.error(data.Message);
+                                        }
+                                    },
+                                    error: function () {
+                                        toastr.error("网络繁忙请稍后再试");
+                                    }
+                                });
+                            }
+                        }
+                        else {
+                            if (roleId == "") {
+                                toastr.warning("请选择角色！");
+                            }
+                            else if (Department == "") {
+                                toastr.warning("请选择部门！");
+                            }
+                        }
+                    }
+                }
+            });
+
+
+            //取消编辑or添加
+            $("button[data-dismiss='modal']").click(function () {
+                clear();
+            });
+        });
+        //编辑
+        function edit(curDom) {
+            modalTitle.html("编辑用户");
+            var id = $(curDom).attr('name');
+            hideId.val(id);
+
+            $("#ausername").attr("disabled", "disabled");
+            $("#apassword").attr("disabled", "disabled");
+            $("#confirm_password").attr("disabled", "disabled");
+
+            //获取详情
+            $.ajax({
+                type: "POST",
+                url: "@WebUrlPath/Json/getUserInfoMessage",
+                data: { ID: id },
+                success: function (rs) {
+
+                    var singleModel = JSON.parse(rs);
+
+                    $("#ausername").val(singleModel[0].UserName);
+                    $("#atruename").val(singleModel[0].TrueName);
+                    $("#roleList").val(singleModel[0].RoleID);
+                    $("#DepartmentList").val(singleModel[0].DepartmentID);
+                    $("#apassword").val(singleModel[0].Password);
+                    $("#confirm_password").val(singleModel[0].Password);
+
+                    pageModel.modal("show");
+                }
+            });
+        };
+
+        //清除
+        function clear() {
+            $("#ausername").val("");
+            $("#atruename").val("");
+            $("#apassword").val("");
+            $("#confirm_password").val("");
+            $("#roleList").val("");
+            $("#DepartmentList").val("");
+        }
+
+    </script>
+
+}

@@ -1,0 +1,226 @@
+﻿@using DBUtility;
+@{
+    ConfigurationHelper config = new ConfigurationHelper();
+    string WebUrlPath = config.getConfigName("WebUrl");
+    Layout = WebUrlPath + "/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "用户权限 | 管理";
+}
+
+@section headBottom{
+<link href="@WebUrlPath/Scripts/select2/select2.min.css" rel="stylesheet" />
+<style type="text/css">
+.myInfo {font-size: 16px;font-weight: bolder;margin-bottom: 5px;}
+.center {text-align: center;}
+</style>
+}
+
+<div class="row border-bottom">
+    <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <div class="navbar-header">
+            <a class="navbar-minimalize minimalize-styl-2 btn btn-primary addbtn-primary" href="#">
+                <i class="fa fa-bars"> </i>
+            </a>
+        </div>
+        <div class="add_button">
+
+        </div>
+    </nav>
+</div>
+<div class="row wrapper border-bottom white-bg page-heading selfpage-heading">
+    <form class="form-horizontal" id="search">
+        <input type="hidden" value="0" id="userID" />
+        <div class="form-group">
+            <div class="col-md-4">
+                <label class="col-md-3 control-label">用户</label>
+                <div class="col-md-8">
+                    <select class="form-control" name="user" id="user"></select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <input type="button" value="保   存" id="submit" class="btn btn-primary" />
+            </div>
+        </div>
+    </form>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>权限管理</h5>
+                </div>
+                <div class="mc-content ibox-content">
+                    <div class="table-responsive">
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section BodyBottom{
+
+<script src="@WebUrlPath/Scripts/select2/select2.min.js"></script>
+
+<script type="text/html" id="listTemplate">
+        {{each parent}}
+        <div class="dataTables_wrapper">
+            <div class="dataTables_info myInfo">
+                <input type="checkbox" id="parent_{{$value.ID}}" name="parent" value="{{$value.ID}}" />{{$value.Name}}
+            </div>
+            <table class="table table-striped table-bordered table-hover" id="table_{{$value.ID}}">
+                <thead>
+                    <tr>
+                        <td>权限名称</td>
+                        <td class="center">分配</td>
+                        <td>权限名称</td>
+                        <td class="center">分配</td>
+                        <td>权限名称</td>
+                        <td class="center">分配</td>
+                        <td>权限名称</td>
+                        <td class="center">分配</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{each $value.child as item index}}
+                    {{if index%4==0}}
+                    <tr>
+                        {{/if}}
+                        <td>{{item.Name}}</td>
+                        <td class="center">
+                            <input type="checkbox" name="privilege" value="{{item.ID}}" />
+                        </td>
+                        {{if (index+1)%4==0}}
+                    </tr>
+                    {{/if}}
+                    {{/each}}
+
+                </tbody>
+            </table>
+        </div>
+        {{/each}}
+    </script>
+
+<script type="text/javascript">
+        var hidId = $("#userID");
+        $(function () {
+            var myModel = new Object();
+
+            //获取权限列表
+            $.ajax({
+                type: "POST",
+                url: "@WebUrlPath/Json/GetPrivilege",
+                success: function (result) {
+                    myModel.parent = JSON.parse(result);
+                    var pHtml = template("listTemplate", myModel);
+                    $(".table-responsive").html(pHtml);
+
+                    $("input[name='parent']").click(function () {//分类全选
+                        var _this = this;
+                        var f = $(_this).prop("checked");
+                        var id = $(_this).val();
+                        var table = "#table_" + id;
+                        if (f == true) {
+                            $(table + " input[name='privilege']").each(function () {
+                                $(this).prop("checked", true);
+                            });
+                        }
+                        else {
+                            $(table + " input[name='privilege']").each(function () {
+                                $(this).prop("checked", false);
+                            });
+                        }
+                    });
+                },
+                error: function b(ms) {
+                    alert("请求失败，请按F5刷新！");
+                    return;
+                }
+            });
+
+            //用户选项
+            $.ajax({
+                type: "POST",
+                url: "@WebUrlPath/Json/getUserInfo",
+                success: function (result) {
+                    var uHtml = "<option value=''>--请选择--</option>";
+                    var data = JSON.parse(result);
+                    for (var i = 0; i < data.length; i++) {
+                        uHtml += "<option value='" + data[i].ID + "'>" + data[i].UserName + "</option>";
+                    }
+                    $("#user").html(uHtml);
+                    $("#user").select2();
+                },
+                error: function b(ms) {
+                    alert("请求失败，请按F5刷新！");
+                    return;
+                }
+            });
+
+
+            $("#user").change(function () {
+                var id = $("#user").val();
+                hidId.val(id);
+                //先取消勾选
+                $("input[name='privilege']").each(function () {
+                    $(this).prop("checked", false);
+                });
+                //获取选中用户的权限
+                $.ajax({
+                    url: "@WebUrlPath/Json/getUserInfoPrivilege/" + id,
+                    success: function (result) {
+                        var str = result.split(',');
+                        for (var i = 0; i < str.length; i++) {
+                            $("input[name='privilege'][value='" + str[i] + "']").prop("checked", true);
+                        }
+                    },
+                    error: function b(ms) {
+                        alert("请求失败，请按F5刷新！");
+                        return;
+                    }
+                });
+            });
+
+            //保存
+            $("#submit").click(function () {
+                var userId = hidId.val();
+                if (userId == 0) {
+                    toastr.info("请选择用户");
+                    return;
+                }
+                var privilegeIds = "";
+                $("input[name='privilege']:checked").each(function (i) {
+                    privilegeIds = privilegeIds + ',' + $(this).val();
+                });
+                privilegeIds = dropRsplit(privilegeIds, ",");
+
+                $.ajax({
+                    type: "POST",
+                    url: "@WebUrlPath/Json/ResertUserInfoPrivilege",
+                    data: { ID: userId, PrivilegeID: privilegeIds },
+                    success: function (data) {
+                        if (data.Result == "success")//成功
+                        {
+                            toastr.success(data.Message);
+                            location.href = data.Address;
+                        }
+                        else if (data.Result == "error") {
+                            toastr.error(data.Message);
+                        }
+                        else if (data.Result == "false") {
+                            toastr.error(data.Message);
+                        }
+                    },
+                    error: function b(ms) {
+                        alert("请求失败，请按F5刷新！");
+                        return;
+                    }
+                });
+            });
+        });
+    </script>
+
+}

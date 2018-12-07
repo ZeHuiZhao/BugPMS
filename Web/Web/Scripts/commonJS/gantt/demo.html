@@ -1,0 +1,129 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>甘特图示例</title>
+	<meta charset="utf-8" />
+    <script src="../../jquery-2.1.1.js"></script>
+    <link href="gantt.css" rel="stylesheet" />
+    <script src="Gantt.js"></script>
+</head>
+<body>
+
+
+
+    <div id="table" > </div>
+
+    <script type="text/javascript">
+            $(function () {
+                dataLeft = [
+                 {
+                      StageName: "阶段", ProjectName: "项目", Num: "编号", Content: "内容",
+                     Other: "其他", target: "目标/输出成果", "data-ID": "0",
+                     "data-Name": "Name", "data-StartDate": "开始时间", "data-EndDate": "结束时间",
+                     "data-Content": "这是第一列，做为标题","data-user":"zhangsan"
+                 },
+                 {
+                     StageName: "一", ProjectName: "调研诊断", Num: "1", Content: "行业研究",
+                     Other: "其他", target: "行业研究内容",
+                     "data-ID": "0", "data-StartDate": "2017-04-05", "data-EndDate": "2017-04-05",
+                     "data-Content": "结束首发沪市跌幅时间", "data-user": "zhangsan", "data-color": "#f00"
+                 },
+                 {
+                     StageName: "一", ProjectName: "调研诊断", Num: "2", Content: "企业研究",
+                     Other: "其他", target: "企业研究成果",
+                     "data-ID": "0", "data-StartDate": "2017-04-08", "data-EndDate": "2017-04-09",
+                     "data-Content": "结束温热亿元时间", "data-user": "zhangsan", "data-color": "#0094ff"
+                 },
+                 {
+                     StageName: "", ProjectName: "", Num: "3", Content: "工作内容部署",
+                     Other: "其他", target: "目标：打酱油",
+                     "data-ID": "0", "data-StartDate": "2017-04-10", "data-EndDate": "2017-04-11",
+                     "data-Content": "结asgash如何束时间",  "data-user": "zhangsan"
+                 },
+                 {
+                    StageName: "", ProjectName: "", Num: "4", Content: "测试内容",
+                     Other: "其他", target: "并没有什么成果",
+                     "data-ID": "0", "data-StartDate": "2017-04-12", "data-EndDate": "2017-04-13",
+                     "data-Content": "结束阿萨德gas时间",  "data-user": "zhangsan"
+                 },
+                 {
+                    StageName: "", ProjectName: "", Num: "5", Content: "123内容",
+                     Other: "其他", target: "千年大计",
+                     "data-ID": "0", "data-StartDate": "2017-04-07", "data-EndDate": "2017-04-20",
+                     "data-Content": "结束时as规定间"
+                 },
+                 {
+                     StageName: "二", ProjectName: "股权激励", Num: "6", Content: "行业研究报告",
+                     Other: "其他", target: "出成果",
+                     "data-ID": "0", "data-StartDate": "2017-05-07", "data-EndDate": "2017-05-15",
+                     "data-Content": "结束啊但是gas时间"
+                 },
+                 {
+                     StageName: "二", ProjectName: "股权激励", Num: "7", Content: "问卷分析",
+                     Other: "其他", target: "0120果",
+                     "data-ID": "0", "data-StartDate": "2017-05-08", "data-EndDate": "2017-05-13",
+                     "data-Content": "ceshi"
+                 },
+                 {
+                     StageName: "二", ProjectName: "股权激励", Num: "8", Content: "问卷分析报告", Other: "其他",
+                     target: "无",
+                     "data-ID": "0", "data-StartDate": "", "data-EndDate": "",
+                     "data-Content": "结束时安德森间"
+                 },
+                 {
+                     StageName: "二", ProjectName: "股权激励", Num: "9", Content: "问卷结论",
+                     Other: "其他", target: "问卷结论输出成果", "data-ID": "0",
+                     "data-StartDate": "", "data-EndDate": "", "data-Content": "内容"
+                 },
+                ];
+                dataUser = [
+                    { Leader: "项目组长", PersonOne: "项目顾问", PersonTwo: "助理顾问", PersonThree: "助理顾问", "data-id": "0" },
+                    { Leader: "张三", PersonOne: "李四", PersonTwo: "王五", PersonThree: "赵六", "data-id": "1" },
+                    { Leader: "张三0", PersonOne: "李四4", PersonTwo: "王五5", PersonThree: "赵六2", "data-id": "2" },
+                    { Leader: "张三8", PersonOne: "李四3", PersonTwo: "王五4", PersonThree: "赵六3", "data-id": "3" },
+                    { Leader: "张三7", PersonOne: "李四2", PersonTwo: "王五3", PersonThree: "赵六4", "data-id": "4" },
+                    { Leader: "张三", PersonOne: "李四", PersonTwo: "王五", PersonThree: "赵六", "data-id": "1" },
+                    { Leader: "张三0", PersonOne: "李四4", PersonTwo: "王五5", PersonThree: "赵六2", "data-id": "2" },
+                    { Leader: "张三8", PersonOne: "李四3", PersonTwo: "王五4", PersonThree: "赵六3", "data-id": "3" },
+                    { Leader: "张三7", PersonOne: "李四2", PersonTwo: "王五3", PersonThree: "赵六4", "data-id": "4" },
+                    { Leader: "张三", PersonOne: "李四", PersonTwo: "王五", PersonThree: "赵六", "data-id": "1" },
+                    { Leader: "张三9", PersonOne: "李四1", PersonTwo: "王五2", PersonThree: "赵六5", "data-id": "5" }
+                ];
+                dataCustom = [
+                   { Leader: "项目组长", PersonOne: "责任人", PersonTwo: "联络人", PersonThree: "办理人", "data-id": "0" },
+                   { Leader: "张三", PersonOne: "李四", PersonTwo: "王五", PersonThree: "赵六", "data-id": "1" },
+                   { Leader: "张三0", PersonOne: "李四4", PersonTwo: "王五5", PersonThree: "赵六2", "data-id": "2" },
+                   { Leader: "张三8", PersonOne: "李四3", PersonTwo: "王五4", PersonThree: "赵六3", "data-id": "3" },
+                    { Leader: "张三", PersonOne: "李四", PersonTwo: "王五", PersonThree: "赵六", "data-id": "1" },
+                    { Leader: "张三0", PersonOne: "李四4", PersonTwo: "王五5", PersonThree: "赵六2", "data-id": "2" },
+                    { Leader: "张三8", PersonOne: "李四3", PersonTwo: "王五4", PersonThree: "赵六3", "data-id": "3" },
+                    { Leader: "张三7", PersonOne: "李四2", PersonTwo: "王五3", PersonThree: "赵六4", "data-id": "4" },
+                   { Leader: "张三7", PersonOne: "李四2", PersonTwo: "王五3", PersonThree: "赵六4", "data-id": "4" },
+                   { Leader: "张三9", PersonOne: "李四1", PersonTwo: "王五2", PersonThree: "赵六5", "data-id": "5" }
+                ];
+                opts = {
+                    title: "工作计划示例",
+                    dataLeft: dataLeft,//含ID,标题，内容，起止时间，标识flag
+                    dataUser: dataUser,
+                    dataCustom: dataCustom,
+                    showCheckbox: false,
+                    showEdit: true,
+                    showDel: false
+                };
+                $("#table").gantt(opts);
+                $("#table").gantt(opts);
+
+                $("a.ganttEdit").click(function () {
+                    var id = $(this);
+                    var html = id.prop("outerHTML");
+                    console.log(html);
+
+                });
+            });
+
+    </script>
+
+
+</body>
+</html>

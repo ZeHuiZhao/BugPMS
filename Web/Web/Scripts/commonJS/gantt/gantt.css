@@ -1,0 +1,16 @@
+﻿table.gantt_jsc {border:0;padding:0;background-color:#fff;color:#333;border-right:1px solid #e7ecf1;border-top:1px solid #ace3d8; padding-bottom:10px;font-size:14px;}
+table.gantt_jsc td { white-space: nowrap;border-left:1px solid #e7ecf1;border-bottom:1px solid #e7ecf1;height:30px;line-height:30px; padding-left:5px;padding-right:5px; vertical-align:top;}
+table.gantt_jsc th { white-space: nowrap;height:40px;line-height:40px; }
+table.gantt_jsc td.noborder {border-top:1px solid #e7ecf1;padding:0;}
+table.gantt_jsc div.ganttScoll {width:700px;overflow-x:scroll;}
+table.gantt_jsc td.Ganttrow th.doubleHeight {height:80px;}
+table.gantt_jsc th.operateHeight {}
+table.gantt_jsc table {border:none; }
+table.gantt_jsc .tdGanttTime {background-color: #1ab394;}
+table.gantt_jsc th.ganttth { background-color: #fbfbfb;border-left:1px solid #e7ecf1;border-bottom:1px solid #e7ecf1;}
+table.gantt_jsc th.weekEnd,td.weekEnd {background-color:#ddd;}
+table.gantt_jsc th.ganttHead {background-color:#fbfbfb;border-left:1px solid #ace3d8;border-bottom:1px solid #ace3d8;}
+table.gantt_jsc td.Ganttrow div td {vertical-align:middle; }
+table.gantt_jsc td.Ganttrow div td.center {text-align:center; }
+table.gantt_jsc .icoEdit {padding:3px; background-position-y:3px;
+background-repeat:no-repeat;padding-left:20px; cursor:pointer;background-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAI7SURBVDhPzZTfS1NhGMc/55xtblMI15bNZF6ERooUFRTEupEko78i/4CgrrroWiKKoEshIgiC0ULbjRJFUURNJcIsC6Igm6155nRzP9z29m47zs0zEcyLPi+Hw/u8L9/zPN/nPa8iJOwiqvHeNf5/QbOH6Rjh1RxCUVCM0Dq5Yo59jg66mjU5S/LobYgHtj4CR3rRjNTqBePfGZp9w6dMjqyM1goWxBpC7WTcf5Y2G0zNjHLxl06708fIiX467JV9G4LZRYanJxiTSh6rh5Mup8yosiQooimtXOnuo0VbRc/YcTly3JsNc6Hbj9tS3lahJFgipX8VQ8/vi/6XIfEsumZEzQTfBcT5FyHxM2sENlFtii4ixIsqFsWOz1nyaDMpnkw+5tpKmryqmvxdpyqolkepPCH9qsRqGZuc4MbyCp1Nbdw+Nki7LcO3yLKxusH2x0ZkCU0FuZpI0tK0n8DpAQ47BQ+ngwzP70AwtjTDyKKO19bGzaMDOMnwem6CW3oOp9VszbaC0ViKvQf8PPXLzJplIC291JewWWRrG1hTFSyWR8VLm7pheU/XGe72HjJmEk3DIZsihILbYW5NVdCjeuUDCZHkVfwH7+MLhPVI/RP/zcd4VJ6GUgKqFDQXWHOwda5PjzOaBausJb/lraZglYlpqos7x8/RU7KhhvpfLznPpbkPfEn8ISEzaHTWCrJU3x4Xlw8OcqrVCNZgvhwo8FlfKAs26lheltvl8uJutChpIPhvbPGdnQJ/AZ9lHK+tjfzyAAAAAElFTkSuQmCC");}

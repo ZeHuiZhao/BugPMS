@@ -1,0 +1,410 @@
+﻿@using DBUtility;
+@model Maticsoft.Model.Project
+@{
+    ConfigurationHelper config = new ConfigurationHelper();
+    string WebUrlPath = config.getConfigName("WebUrl");
+    Layout = WebUrlPath + "/Views/Shared/_Layout.cshtml";
+    Maticsoft.BLL.BaseData BBaseData = new Maticsoft.BLL.BaseData();
+    Maticsoft.BLL.Common BCommon = new Maticsoft.BLL.Common();
+    string operate = "";
+    if (ViewData["operate"] != null)
+    {
+        operate = ViewData["operate"].ToString();
+    }
+}
+@section headBottom{
+    <style>
+.tablescroll { overflow-x:auto;padding-bottom:50px; }
+#tablePlan,.tablePlan { width:100%; max-width:1800px;overflow-x:scroll;}
+    </style>
+}
+<div class="row border-bottom">
+    <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <div class="navbar-header">
+            <a class="navbar-minimalize minimalize-styl-2 btn btn-primary addbtn-primary" href="#">
+                <i class="fa fa-bars"> </i>
+            </a>
+        </div>
+        <div class="add_button">
+
+        </div>
+    </nav>
+</div>
+<div class="row wrapper border-bottom white-bg p-m">
+    <form class="form-horizontal" id="search">
+        <div class="form-group">
+            <div class="col-sm-12 row">
+                <div class="col-md-2 m-t-sm">
+                    <input type="text" class="form-control" placeholder="关键字（需求、目标）" name="keyName" />
+                    <input type="hidden" name="ProjectID" value="@Model.ID" />
+                </div>
+                <div class="col-md-2 m-t-sm">
+                    <select class="form-control" name="DealStatusID" id="HeadDealStatusID"></select>
+                </div>
+                <div class="col-md-3 m-t-sm">
+                    <div class="input-group" id="datepicker" title="提交日期">
+                        <input type="text" class="form-control pickerdate" placeholder="开始日期" name="StartTime" onfocus="WdatePicker({ readOnly: true })" />
+                        <span class="input-group-addon">to</span>
+                        <input type="text" class="form-control pickerdate" placeholder="结束日期" name="EndTime" onfocus="WdatePicker({ readOnly: true })" />
+                    </div>
+                </div>
+                <div class="col-md-1 m-t-sm p-xs m-l-md">
+                    <input type="checkbox" name="CBOnlyMe">
+                    <label for="CBOnlyMe">我的需求</label>
+                </div>
+                <div class="col-md-1 m-t-sm">
+                    <input type="button" value="筛   选" id="submit" class="btn btn-primary" />
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-md-12">
+@if (Model != null)
+{
+    var MProjectTypeList = BBaseData.GetModelList(" TableName='ProjectType' AND KeyID='" + Model.ProjectTypeID + "'");
+
+    string ProjectType = "";
+    if (MProjectTypeList != null && MProjectTypeList.Count > 0)
+    {
+        ProjectType = MProjectTypeList[0].Name;
+    }
+            <div class="ibox float-e-margins">
+                <div class="ibox-title" id="ProjectInfo" data-id="@Model.ID">
+
+                    <h5>@("[" + Model.Code + "]" + Model.Name) | 完成计划<span class="btn-danger m-l p-xxs b-rs-xxs">@ProjectType</span></h5>
+                    <h5 class="pull-right">@(Convert.ToDateTime(Model.PlanStartTime).ToString("yyyy-MM-dd") + " 至 " + Convert.ToDateTime(Model.PlanEndTime).ToString("yyyy-MM-dd") )</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="form-horizontal clear">
+                      
+                            <div class="hr-line-dashed"></div>
+                            <div class="col-md-12 col-lg-12 tablescroll mc-content">
+                                @Html.Action("ProjectPlanDoneItem", "Project",
+                           new RouteValueDictionary(){
+                            {"ProjectID", Model.ID},
+                               { "flag",ViewData["flag"] }
+                           })
+                            </div>
+                    </div>
+                </div>
+
+            </div>
+}
+        </div>
+    </div>
+</div>
+
+<div class="modal inmodal" id="PlanDoneModal" ria-labelledby="addUserModalLabel" tabindex="-2" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content animated fadeInDown">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body position_r clearfix">
+
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label m-xs">需求/bug描述</label>
+                        <div class="col-lg-7 m-xs Contents">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label m-xs">实际开始时间</label>
+                        <div class="col-lg-7 m-xs">
+                            <input placeholder="实际开始时间" class="form-control RealStartTime" type="text" onfocus="WdatePicker({ readOnly: true })">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label m-xs">实际结束时间</label>
+                        <div class="col-lg-7 m-xs">
+                            <input placeholder="实际结束时间" class="form-control RealEndTime" type="text" onfocus="WdatePicker({ readOnly: true })">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label m-xs">结果</label>
+                        <div class="col-lg-7 m-xs">
+                            <select class="form-control" name="DealStatusID" id="DealStatusID"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label m-xs">完成情况</label>
+                        <div class="col-lg-7 m-xs">
+                            <textarea placeholder="完成情况" class="form-control Result h-100" ></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label m-xs">备注</label>
+                        <div class="col-lg-7 m-xs">
+                            <textarea placeholder="备注" class="form-control Note h-100"  ></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button data-dismiss="modal" class="btn btn-white" type="button" id="cancel">取消</button>
+                <input type="button" id="PlanDone" value="确认" class="btn btn-primary" />
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal inmodal" id="PlanModal" ria-labelledby="addUserModalLabel" tabindex="-2" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content animated fadeInDown">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body position_r clearfix">
+
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label m-xs">需求/bug描述</label>
+                        <div class="col-lg-7 m-xs Contents">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label m-xs">计划开始时间</label>
+                        <div class="col-lg-7 m-xs">
+                            <input placeholder="计划开始时间" class="form-control PlanStartTime" type="text" onfocus="WdatePicker({ readOnly: true })">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label m-xs">计划结束时间</label>
+                        <div class="col-lg-7 m-xs">
+                            <input placeholder="计划结束时间" class="form-control PlanEndTime" type="text" onfocus="WdatePicker({ readOnly: true })">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-lg-3 control-label m-xs">任务接收人</label>
+                        <div class="col-lg-7 m-xs">
+                            <select class="form-control" id="DealUserID" name="DealUserID" ></select>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button data-dismiss="modal" class="btn btn-white" type="button" >取消</button>
+                <input type="button" id="Plan" value="确认" class="btn btn-primary" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@section BodyBottom{
+<script type="text/javascript">
+    $(function () {
+        var pageModel = $("#PlanDoneModal");//模态框
+        var PagemodalTitle = $("#PlanDoneModal .modal-title");
+
+        var Modal = $("#PlanModal");//模态框
+        var ModalTitle = $("#PlanModal .modal-title");
+        $.ajax({
+            type: "POST",
+            url: "@WebUrlPath/Json/getUserList",
+            data:{strWhere:" and RoleID=4"},
+            success: function (result) {
+                var pHtml = "<option value=''>--请选择--</option>";
+                var data = JSON.parse(result);
+                var name = "";
+                for (var i = 0; i < data.length; i++) {
+                    pHtml += "<option value='" + data[i].ID + "'>" + data[i].TrueName + "</option>"
+                }
+                $("#DealUserID").html(pHtml);
+                },
+            error: function b(ms) {
+                alert("请求失败，请按F5刷新！");
+                return;
+            }
+        });
+        
+        $.ajax({
+            type: "POST",
+            url: "@WebUrlPath/Json/getBaseData",
+            data: { TableName: 'DealStatus', strWhere:" and KeyID>2 " },
+            success: function (result) {
+                var pHtml = "<option value=''>选择结果</option>";
+                var data = JSON.parse(result);
+                for (var i = 0; i < data.length; i++) {
+                    pHtml += "<option value='" + data[i].KeyID + "' class='" + data[i].ClassName + "'>" + data[i].Name + "</option>"
+                }
+                
+                $("#DealStatusID").html(pHtml);
+            },
+            error: function b(ms) {
+                alert("请求失败，请按F5刷新！");
+                return;
+            }
+        });
+        $.ajax({
+            type: "POST",
+            url: "@WebUrlPath/Json/getBaseData",
+            data: { TableName: 'DealStatus' },
+            success: function (result) {
+                var pHtml = "<option value=''>任务状态</option>";
+                var data = JSON.parse(result);
+                for (var i = 0; i < data.length; i++) {
+                    pHtml += "<option value='" + data[i].KeyID + "' class='" + data[i].ClassName + "'>" + data[i].Name + "</option>"
+                }
+
+                $("#HeadDealStatusID").html(pHtml);
+            },
+            error: function b(ms) {
+                alert("请求失败，请按F5刷新！");
+                return;
+            }
+        });
+        $("a.GivePlan").click(function () {
+            var tr = $(this).parent().parent();
+            var Planid = tr.attr("data-Planid");
+            var Contents = tr.find("td span.trContents").html();
+            ModalTitle.html("完成计划");
+            Modal.attr("data-Planid", Planid);
+            Modal.find("div.Contents").text(Contents);
+            Modal.modal("show");
+        });
+        $("#Plan").click(function () {//分配
+            var Planid = Modal.attr("data-Planid");
+
+            var PlanStartTime = Modal.find("input.PlanStartTime").val();
+            var PlanEndTime = Modal.find("input.PlanEndTime").val();
+            var DealUserID = Modal.find("#DealUserID").val();
+            var subDay = getWeekNum(PlanStartTime, PlanEndTime, "day");
+            if (subDay < 0) {
+                $(this).removeAttr("disabled");
+                toastr.error("开始时间不得大于结束时间");
+                tr.addClass("has-error");
+            }
+            else {
+                if (PlanStartTime != "" && DealUserID!="") {
+                    var strMath = "zlgw" + new Date().getTime();
+                    var data = {
+                        PlanID: Planid, PlanStartTime: PlanStartTime, PlanEndTime: PlanEndTime, DealUserID: DealUserID,
+                         strMath: strMath
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: '@WebUrlPath/Json/ProjectTaskGive',
+                        data: data,
+                        cache: false,
+                        success: function (data) {
+                            if (data.Result == "success") {
+                                Modal.modal("hide");
+                                toastr.success(data.Message);
+                                var url = "window.location.reload();";
+                                window.setTimeout(url, 1000);
+                            }
+                            else {
+                                toastr.error(data.Message);
+                            }
+                        },
+                        error: function () {
+                            toastr.error("网络繁忙请稍后再试");
+                        }
+                    });
+                }
+                else {
+                    Modal.addClass("has-error");
+                }
+            }
+        });
+        $("a.DonePlan").click(function () {//完成按钮点击
+            var tr = $(this).parent().parent();       
+            var Planid = tr.attr("data-Planid");
+            var Contents = tr.find("td.trContents").html();
+            var RealStartTime = tr.find("td span.trRealStartTime").text();
+            var RealEndTime = tr.find("td span.trRealEndTime").text();
+            var Result = tr.find("td.trResult").text();
+            var Note = tr.find("td.trNote").text();
+            PagemodalTitle.html("完成计划");
+            pageModel.attr("data-Planid", Planid);
+            pageModel.find("div.Contents").text(Contents);
+            pageModel.find("input.RealStartTime").val(RealStartTime);
+            pageModel.find("input.RealEndTime").val(RealEndTime);
+            pageModel.find("textarea.Result").val(Result);
+
+            pageModel.find("textarea.Note").val(Note);
+
+            pageModel.modal("show");
+        });
+        $("#PlanDone").click(function () {//完成计划
+            var Planid = pageModel.attr("data-Planid");
+            var DealStatusID = $("#DealStatusID").val();
+            var RealStartTime = pageModel.find("input.RealStartTime").val();
+            var RealEndTime = pageModel.find("input.RealEndTime").val();
+            var Result = pageModel.find("textarea.Result").val();
+            var Note = pageModel.find("textarea.Note").val();
+            var subDay = getWeekNum(RealStartTime, RealEndTime, "day");
+            if (subDay < 0) {
+                $(this).removeAttr("disabled");
+                toastr.error("开始时间不得大于结束时间");
+                tr.addClass("has-error");
+            }
+            else {
+                if (RealStartTime != "" && DealStatusID != "") {
+                    var strMath = "zlgw" + new Date().getTime();
+                    var data = {
+                        PlanID: Planid, RealStartTime: RealStartTime, RealEndTime: RealEndTime, Result: Result,
+                        Note: Note,DealStatusID:DealStatusID, strMath: strMath
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: '@WebUrlPath/Json/ProjectTaskDone',
+                        data: data,
+                        cache: false,
+                        success: function (data) {
+                            if (data.Result == "success") {
+                                pageModel.modal("hide");
+                                toastr.success(data.Message);
+                                var url = "window.location.reload();";
+                                window.setTimeout(url, 1000);
+                            }
+                            else {
+                                toastr.error(data.Message);
+                            }
+                        },
+                        error: function () {
+                            toastr.error("网络繁忙请稍后再试");
+                        }
+                    });
+                }
+                else {
+                    pageModel.addClass("has-error");
+                }
+            }
+        });
+        //获取两个日期的周数差或天数差，两天相等则差为1
+        function getWeekNum(StartDate, EndDate, flag) {
+            if (StartDate != "" && EndDate != "") {
+                StartDate = new Date(StartDate);
+                EndDate = new Date(EndDate);
+                var days = EndDate.getTime() - StartDate.getTime();
+
+
+                if (flag == "day") {
+                    var day = Math.ceil(days / (1000 * 60 * 60 * 24));
+                    return day;
+                }
+                else {//取整
+                    var day = parseInt(days / (1000 * 60 * 60 * 24));
+                    var week = Math.ceil(day / 7);
+                    return week;
+                }
+            }
+            else {
+                return 0;
+            }
+        }
+});
+</script>
+}

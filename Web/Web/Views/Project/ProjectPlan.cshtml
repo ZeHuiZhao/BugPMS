@@ -1,0 +1,165 @@
+﻿@using DBUtility;
+@model Maticsoft.Model.Project
+@{
+    ConfigurationHelper config = new ConfigurationHelper();
+    Maticsoft.BLL.Common common = new Maticsoft.BLL.Common();
+    string WebUrlPath = config.getConfigName("WebUrl");
+    Layout = WebUrlPath + "/Views/Shared/_Layout.cshtml";
+    Maticsoft.BLL.BaseData BBaseData = new Maticsoft.BLL.BaseData();
+    bool Submitflag = false;
+    if (Session["UserInfoID"] != null )
+    {
+        Submitflag = true;
+    }
+}
+<div class="row border-bottom">
+    <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <div class="navbar-header">
+            <a class="navbar-minimalize minimalize-styl-2 btn btn-primary addbtn-primary" href="#">
+                <i class="fa fa-bars"> </i>
+            </a>
+        </div>
+        <div class="add_button">
+            @if (Model != null && (Model.ProjectCheckStatus == 1 || Model.ProjectCheckStatus == 4)
+                &&Submitflag)
+            {
+                <button class="btn btn-primary headbtn-primary ProjectSubmit" type="button">
+                    <i class="fa fa-check"></i>
+                    提交审核
+                </button>
+            }
+        </div>
+    </nav>
+</div>
+@if (Model != null)
+{
+    var MProjectTypeList = BBaseData.GetModelList(" TableName='ProjectType' AND KeyID='" + Model.ProjectTypeID + "'");
+
+    string ProjectType = "";
+    if (MProjectTypeList != null && MProjectTypeList.Count > 0)
+    {
+        ProjectType = MProjectTypeList[0].Name;
+    }
+    <div class="row wrapper border-bottom white-bg p-m">
+        <form class="form-horizontal" id="search">
+            <div class="form-group">
+                <div class="col-sm-12 row">
+                    <div class="col-md-2 m-t-sm">
+                        <input type="text" class="form-control" placeholder="关键字（需求、目标）" name="keyName" />
+                        <input type="hidden" name="ProjectID" value="@Model.ID" />
+                    </div>
+                    <div class="col-md-2 m-t-sm">
+                        <select class="form-control" name="ProjectTaskCheckStatusID" id="ProjectTaskCheckStatusID"></select>
+                    </div>
+                    <div class="col-md-3 m-t-sm">
+                        
+                        <div class="input-group" id="datepicker" title="提交日期">
+                            <input type="text" class="form-control pickerdate" placeholder="开始日期" name="StartTime" onfocus="WdatePicker({ readOnly: true })" />
+                            <span class="input-group-addon">to</span>
+                            <input type="text" class="form-control pickerdate" placeholder="结束日期" name="EndTime" onfocus="WdatePicker({ readOnly: true })" />
+                        </div>
+                    </div>
+                    <div class="col-md-1 m-t-sm p-xs m-l-md">
+                            <input type="checkbox" name="CBOnlyMe">
+                            <label for="CBOnlyMe">只看我的需求</label>
+                    </div>
+
+                    <div class="col-md-1 m-t-sm">
+                        <input type="button" value="筛   选" id="submit" class="btn btn-primary" />
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title" id="ProjectInfo" data-id="@Model.ID">
+
+                    <h5>@(Model.Name) | 项目计划<span class="btn-danger m-l p-xxs b-rs-xxs">@ProjectType</span></h5>
+                    <h5 class="pull-right">@(Convert.ToDateTime(Model.PlanStartTime).ToString("yyyy-MM-dd") + " 至 " + Convert.ToDateTime(Model.PlanEndTime).ToString("yyyy-MM-dd") )</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="form-horizontal clear">
+                        <div >
+                            <button class="btn btn-primary headbtn-primary ProjectAdd pull-right" type="button">
+                                <i class="fa fa-plus"></i>
+                                需求/反馈
+                            </button>
+                        </div>
+                    
+                        <div class="col-md-12 col-lg-12 mc-content">
+                            @Html.Action("ProjectPlanItem", "Project",
+                           new RouteValueDictionary(){
+                            {"ProjectID", Model.ID},
+                            { "flag",ViewData["flag"] }
+                            })
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+<div id="ChangePlanTemplate" class="hidden">
+    <form class="form-horizontal" id="addPlan">
+        <div class="form-group">
+            <label class="col-lg-12 m-xs">需求/bug描述<span class="text-danger">*必填</span></label>
+            <div class="col-lg-12 m-xs">
+                <textarea placeholder="需求/bug描述" class="form-control PlanName h-200"></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-12 m-xs">期望完成时间<span class="text-danger">*必填</span></label>
+            <div class="col-lg-12 m-xs">
+                <input placeholder="期望完成时间" class="form-control ExpectedDate" onfocus="WdatePicker({ readOnly: true })" type="text">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-12 m-xs">目标/期望</label>
+            <div class="col-lg-12 m-xs">
+                <input placeholder="目标/期望" class="form-control Target" type="text" >
+            </div>
+        </div>       
+        <div class="form-group">
+            <label class="col-lg-12 m-xs">附件：</label>
+                <div class="col-lg-12 m-xs">
+                    <input type="file" class="form-control" value="选择附件" name="FilePlan">
+                </div>
+                <p  class="col-lg-12 m-xs" style="line-height:35px;">
+                    注：仅能上传一个文件,大小<span class="label label-primary m-xs">50M以内</span>
+                    支持格式为<span class="label label-danger m-xs">doc/docx</span><span class="label label-warning m-xs">jpg/png/gif</span>
+                    <span class="label label-info m-xs">pdf</span><span class="label label-danger m-xs">xls/xlsx</span>
+                    <span class="label label-default m-xs">zip/rar</span><span class="label label-success m-xs">txt</span>
+                </p>
+        </div>
+    </form>
+</div>
+<div class="modal inmodal" id="Modal" tabindex="-3" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content animated fadeInDown">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body position_r clearfix">
+            </div>
+            <div class="modal-footer">
+                <button data-dismiss="modal" class="btn btn-white" type="button" id="cancel">取消</button>
+                <input type="button" id="btnPlanChange" value="确认" class="btn btn-primary" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section BodyBottom{
+<script src="@WebUrlPath/Scripts/commonJS/Plan.js"></script>
+}

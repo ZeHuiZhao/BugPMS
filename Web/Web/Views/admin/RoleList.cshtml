@@ -1,0 +1,47 @@
+﻿@model List<Maticsoft.Model.Role>
+@{
+    Layout = null;
+}
+
+<table class="table table-hover table-striped selfTable">
+    <thead>
+        <tr>
+            <th>
+                <input class="js_selectAll" type="checkbox" id="js_selectAll" />
+            </th>
+            <th>编号</th>
+            <th>名称</th>
+            <th>对应权限</th>
+            <th>管 理 操 作</th>
+        </tr>
+    </thead>
+    <tbody id="pagecontent">
+            @foreach (Maticsoft.Model.Role d in Model)
+            {
+                <tr class="gradeX">
+                    <th>
+                        <input class="js_selectAll" type="checkbox" value="@(d.ID)" name="userSelector" />
+                    </th>
+                    <td>@d.ID</td>
+                    <td>@d.Name</td>  
+                    <td>@d.PrivilegeID</td>                  
+                    <td class="center">
+                        <a class="reset" data-id="edit" name="@d.ID" onclick="edit(this);">编辑</a>
+                    </td>
+                </tr>
+            }
+    </tbody>
+</table>
+
+<div class="row">
+    <div class="col-md-12">
+        <ul id="pagination" class="pagination  pull-right" data-pagecount="@(ViewData["pagecount"])" data-currentpage="@(ViewData["currentpage"])"
+            data-url="/admin/RoleList"></ul>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    LoadPagination();
+});
+</script>

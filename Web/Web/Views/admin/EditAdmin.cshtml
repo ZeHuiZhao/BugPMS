@@ -1,0 +1,91 @@
+﻿@{
+    Layout = null;
+}
+<div class="modal-content animated fadeInDown">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">
+            <span aria-hidden="true">×</span>
+            <span class="sr-only">Close</span>
+        </button>
+        <h4 class="modal-title">编辑用户信息</h4>
+    </div>
+    <div class="modal-body position_r clearfix">
+        <div class="up_pic" id="avatar_img" data-toggle="modal" data-target="#up_photo"> </div>
+        <div class="input-s fl m-r-lg">
+            <div class="divtext">
+                <span>用&nbsp; &nbsp; 户名：</span>
+                <span>
+                    <input type="text" class="form-control form-controls" placeholder="用 户 名" required="" id="ausername">
+                </span>
+            </div>
+        </div>
+        <div class="input-s-sm fl m-r-lg">
+            <div class="divtext">
+                <span>真实姓名：</span>
+                <span>
+                    <input type="text" class="form-control form-controls" placeholder="真实姓名" required="" id="atruename">
+                </span>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+        <div class="input-s fl m-r-lg">
+            <div class="divtext">
+                <span>密 &nbsp; &nbsp;&nbsp; &nbsp;  码：</span>
+                <span>
+                    <input type="password" class="form-control form-controls" placeholder="确认密码" required="" id="apassword">
+                </span>
+            </div>
+        </div>
+        <div class="input-s-sm fl m-r-lg">
+            <div class="divtext">
+                <span>确认密码：</span>
+                <span>
+                    <input type="password" class="form-control form-controls" placeholder="确认密码" required="" id="aCpassword">
+                </span>
+            </div>
+        </div>
+
+        <div class="input-s fl m-r-lg">
+            <div class="divtext">
+                <span>分配权限：</span>
+                <span>
+                    @if (ViewData["PrivilegeList"] != null)
+                    {
+                        int i = 0;
+                        List<Maticsoft.Model.Privilege> PrivilegeList = ViewData["PrivilegeList"] as List<Maticsoft.Model.Privilege>;
+                        foreach (var Privilege in PrivilegeList)
+                        {
+                            i++;
+                            if (i == 5)
+                            {
+                                <br />
+                                <span style="width:24%!important;text-align:left!important; margin-left:80px!important;">
+                                    @Privilege.Name <input type="checkbox" name="privilege" value="@Privilege.ID" style="padding:5px 10px 5px;" />
+                                </span>
+                            }
+                            else if (i == 9)
+                            {
+                                <br />
+                                <span style="width:24%!important;text-align:left!important; margin-left:80px!important;">
+                                    @Privilege.Name <input type="checkbox" name="privilege" value="@Privilege.ID" style="padding:5px 10px 5px;" />
+                                </span>
+                            }
+                            else
+                            {
+                                <span style="width:24%!important;text-align:left!important; margin-left:10px!important;">
+                                    @Privilege.Name <input type="checkbox" name="privilege" value="@Privilege.ID" style="padding:5px 10px 5px;" />
+                                </span>
+                            }
+                        }
+                    }
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button data-dismiss="modal" class="btn btn-white" type="button" id="cancleb">取消</button>
+        <input type="submit" id="adduserInfo" value="添加" class="btn btn-primary" />
+    </div>
+</div>
+
+ 
